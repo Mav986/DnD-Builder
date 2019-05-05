@@ -8,9 +8,9 @@ namespace DnDBuilder.Web
     {
         private const int CacheExpiryInMinutes = 60;
         private readonly ObjectCache _cache;
-        
+
         /// <summary>
-        /// Stores and retrieves JObject's in an ObjectCache
+        ///     Stores and retrieves JObject's in an ObjectCache
         /// </summary>
         public CacheHandler()
         {
@@ -18,23 +18,20 @@ namespace DnDBuilder.Web
         }
 
         /// <summary>
-        /// Add a JObject to the cache
+        ///     Add a JObject to the cache
         /// </summary>
         /// <param name="key">A unique string to locate the object</param>
         /// <param name="data">JObject to be stored</param>
         public void Add(string key, JObject data)
         {
-            if (Contains(key))
-            {
-                throw new ArgumentException("Cannot add duplicate key", key);
-            }
-            
-            DateTimeOffset expiryInMinutes = DateTimeOffset.Now.AddMinutes(CacheExpiryInMinutes);
+            if (Contains(key)) throw new ArgumentException("Cannot add duplicate key", key);
+
+            var expiryInMinutes = DateTimeOffset.Now.AddMinutes(CacheExpiryInMinutes);
             _cache.Add(key, data, expiryInMinutes);
         }
 
         /// <summary>
-        /// Retrieve a JObject from the cache
+        ///     Retrieve a JObject from the cache
         /// </summary>
         /// <param name="key">A unique string to locate the object</param>
         /// <returns>The JObject from the cache, otherwise null</returns>
@@ -44,7 +41,7 @@ namespace DnDBuilder.Web
         }
 
         /// <summary>
-        /// Check if a JObject is cached
+        ///     Check if a JObject is cached
         /// </summary>
         /// <param name="key">A unique string to locate the object</param>
         /// <returns>True if the JObject is cached, otherwise False</returns>

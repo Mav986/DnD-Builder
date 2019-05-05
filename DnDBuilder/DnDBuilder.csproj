@@ -87,14 +87,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\DnDController.cs" />
+    <Compile Include="Controllers\RouteController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Handlers\Class.cs" />
-    <Compile Include="Handlers\JObjectCache.cs" />
-    <Compile Include="Handlers\RequestHandler.cs" />
-    <Compile Include="Handlers\Race.cs" />
+    <Compile Include="Handlers\CharacterHandler.cs" />
+    <Compile Include="Web\RequestHandler.cs" />
+    <Compile Include="Web\CacheHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
