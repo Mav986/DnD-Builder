@@ -24,7 +24,6 @@ namespace DnDBuilder.Handlers
         public JObject GetRaces()
         {
             const string cacheKey = "racesKey";
-            const int expiryInMinutes = 10;
             JObject races;
             
             if (_cache.Contains(cacheKey))
@@ -34,7 +33,7 @@ namespace DnDBuilder.Handlers
             else
             {
                 races = _client.GetJson("races");
-                _cache.Add(cacheKey, races, expiryInMinutes);
+                _cache.Add(cacheKey, races);
             }
             
             return races;

@@ -6,6 +6,7 @@ namespace DnDBuilder.Handlers
 {
     public class JObjectCache
     {
+        private const int CacheExpiryInMinutes = 60;
         private readonly ObjectCache _cache;
         
         /// <summary>
@@ -21,15 +22,14 @@ namespace DnDBuilder.Handlers
         /// </summary>
         /// <param name="key">A unique string to locate the object</param>
         /// <param name="data">JObject to be stored</param>
-        /// <param name="expiry">An integer indicating how many minutes an object should be cached</param>
-        public void Add(string key, JObject data, int expiry)
+        public void Add(string key, JObject data)
         {
             if (Contains(key))
             {
                 throw new ArgumentException("Cannot add duplicate key", key);
             }
             
-            DateTimeOffset expiryInMinutes = DateTimeOffset.Now.AddMinutes(expiry);
+            DateTimeOffset expiryInMinutes = DateTimeOffset.Now.AddMinutes(CacheExpiryInMinutes);
             _cache.Add(key, data, expiryInMinutes);
         }
 
