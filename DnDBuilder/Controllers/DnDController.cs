@@ -12,15 +12,18 @@ namespace DnDBuilder.Controllers
         
         private readonly Race _raceHandler;
         
+        /// <summary>
+        /// Store and retrieve DnD character data
+        /// </summary>
         public DnDController()
         {
-            var httpClient = new HttpClient
-            {
-                BaseAddress = new Uri(BaseUri)
-            };
-            _raceHandler = new Race(httpClient);
+            _raceHandler = new Race(BaseUri);
         }
         
+        /// <summary>
+        /// GET all races
+        /// </summary>
+        /// <returns>A JObject containing all DnD 5e races</returns>
         [HttpGet]
         [Route("races/all")]
         public JObject Get()

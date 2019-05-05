@@ -1,26 +1,41 @@
-using System.Net.Http;
 using Newtonsoft.Json.Linq;
 
 namespace DnDBuilder.Handlers
 {
     public class Race
     {
-        // Endpoints
-        private const string Races = "races";
+        private readonly RequestHandler _client;
+        private readonly JObjectCache _cache;
         
-        private readonly HttpClient _client;
-        
-        public Race(HttpClient client)
+        /// <summary>
+        /// Retrieves DnD 5e data from the supplied url 
+        /// </summary>
+        /// <param name="baseUri">A string containing the base url</param>
+        public Race(string baseUri)
         {
-            _client = client;
-
+            _client = new RequestHandler(baseUri);
+            _cache = new JObjectCache();
         }
 
+        /// <summary>
+        /// Retrieves racial data from the base url
+        /// </summary>
+        /// <returns>JSON object containing the official 5e races</returns>
         public JObject GetRaces()
         {
-            HttpResponseMessage res = _client.GetAsync(Races).Result;
-            res.EnsureSuccessStatusCode();
-            JObject races = res.Content.ReadAsAsync<JObject>().Result;
+            const string cacheKey = "racesKey";
+            const int expiryInMinutes = 10;
+            JObject races;
+            
+            if (_cache.Contains(cacheKey))
+            {
+                races = _cache.Get(cacheKey);
+            }
+            else
+            {
+                races = _client.GetJson("races");
+                _cache.Add(cacheKey, races, expiryInMinutes);
+            }
             
             return races;
         }
