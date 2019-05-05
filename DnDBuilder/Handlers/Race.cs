@@ -7,17 +7,18 @@ namespace DnDBuilder.Handlers
 {
     public class Race
     {
-        private readonly RequestHandler _client;
-        private readonly JObjectCache _cache;
-        
+        private readonly RequestHandler _reqHandler;
+        private readonly CacheHandler _cacheHandler;
+
         /// <summary>
         /// Retrieves DnD 5e data from the supplied url 
         /// </summary>
-        /// <param name="baseUri">A string containing the base url</param>
-        public Race(string baseUri)
+        /// <param name="reqHandler"></param>
+        /// <param name="cacheHandler"></param>
+        public Race(RequestHandler reqHandler, CacheHandler cacheHandler)
         {
-            _client = new RequestHandler(baseUri);
-            _cache = new JObjectCache();
+            _reqHandler = reqHandler;
+            _cacheHandler = cacheHandler;
         }
 
         /// <summary>
@@ -62,14 +63,14 @@ namespace DnDBuilder.Handlers
         {
             JObject res;
             
-            if (_cache.Contains(key))
+            if (_cacheHandler.Contains(key))
             {
-                res = _cache.Get(key);
+                res = _cacheHandler.Get(key);
             }
             else
             {
-                res = _client.GetJson(url);
-                _cache.Add(key, res);
+                res = _reqHandler.GetJson(url);
+                _cacheHandler.Add(key, res);
             }
 
             return res;

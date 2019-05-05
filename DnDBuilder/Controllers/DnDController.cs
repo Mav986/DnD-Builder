@@ -3,14 +3,13 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using DnDBuilder.Handlers;
+using DnDBuilder.Web;
 using Newtonsoft.Json.Linq;
 
 namespace DnDBuilder.Controllers
 {
     public class DnDController : ApiController
     {
-        private const string BaseUri = "http://www.dnd5eapi.co/api/";
-        
         private readonly Race _raceHandler;
         
         /// <summary>
@@ -18,7 +17,10 @@ namespace DnDBuilder.Controllers
         /// </summary>
         public DnDController()
         {
-            _raceHandler = new Race(BaseUri);
+            _raceHandler = new Race(
+                new RequestHandler("http://www.dnd5eapi.co/api/"), 
+                new CacheHandler()
+                );
         }
         
         /// <summary>

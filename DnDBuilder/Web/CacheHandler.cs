@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DnDBuilder.Web
 {
-    public class JObjectCache
+    public class CacheHandler
     {
         private const int CacheExpiryInMinutes = 60;
         private readonly ObjectCache _cache;
@@ -12,7 +12,7 @@ namespace DnDBuilder.Web
         /// <summary>
         /// Stores and retrieves JObject's in an ObjectCache
         /// </summary>
-        public JObjectCache()
+        public CacheHandler()
         {
             _cache = MemoryCache.Default;
         }
