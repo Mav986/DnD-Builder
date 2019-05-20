@@ -1,4 +1,3 @@
-using System.Data;
 using System.IO;
 using Mono.Data.Sqlite;
 
@@ -6,35 +5,71 @@ namespace DnDBuilderLinux.Database
 {
     public class DatabaseHandler
     {
-        private readonly string _filename;
-        private readonly string _connectionString;
-        
-        private SqliteConnection _connection;
-
-        public DatabaseHandler(string filename)
+        public DatabaseHandler()
         {
-            _filename = filename;
-            _connectionString = "Data Source=" + _filename + "; Version=3; Pooling=True;";
             CreateDatabase();
+            CreateCharacterTable();
         }
 
-        public void Insert(string sqlCommand)
+        /// <summary>
+        ///     Check if a specific table exists in the database
+        /// </summary>
+        /// <param name="name">The name of the table</param>
+        /// <returns>True if the table exists, false otherwise</returns>
+        public bool TableExists(string name)
         {
-            
+            bool exists;
+
+            try
+            {
+                using (SqliteConnection dbConn = GetConnection())
+                {
+                    SqliteCommand cmd = new SqliteCommand(Schema.Character.Query.FindTable, dbConn);
+                    cmd.Parameters.AddWithValue(Schema.Character.Parameter.Name, name);
+                    SqliteDataReader reader = cmd.ExecuteReader();
+                
+                    exists = reader.HasRows;
+                }
+            }
+            catch (SqliteException e)
+            {
+                throw new DatabaseException(e.Message, e);
+            }
+
+            return exists;
         }
 
         /// <summary>
         ///     Create the database file on system, if one does not already exists
         /// </summary>
-        /// TODO not really sure why it throws an exception...
         /// <exception cref="DatabaseException"></exception>
         private void CreateDatabase()
         {
             try
             {
-                if (!File.Exists(_filename))
+                if (!File.Exists(Schema.Database.Filename))
                 {
-                    SqliteConnection.CreateFile(_filename);
+                    SqliteConnection.CreateFile(Schema.Database.Filename);
+                }
+            }
+            catch (IOException e)
+            {
+                throw new DatabaseException(e.Message, e);
+            }
+        }
+
+        /// <summary>
+        ///     Create a table to store character data
+        /// </summary>
+        /// <exception cref="DatabaseException"></exception>
+        private void CreateCharacterTable()
+        {
+            try
+            {
+                using (SqliteConnection dbConn = GetConnection())
+                {
+                    SqliteCommand cmd = new SqliteCommand(Schema.Character.Query.CreateTable, dbConn);
+                    cmd.ExecuteNonQuery();
                 }
             }
             catch (SqliteException e)
@@ -46,66 +81,12 @@ namespace DnDBuilderLinux.Database
         /// <summary>
         ///     Open the connection to the database
         /// </summary>
-        private void Connect()
+        private SqliteConnection GetConnection()
         {
-            _connection = new SqliteConnection(_connectionString);
-            _connection.Open();
-        }
+            SqliteConnection connection = new SqliteConnection(Schema.Database.Query.Connect);
+            connection.Open();
 
-        private bool ConnectionOpen()
-        {
-            return _connection.State == ConnectionState.Open;
-        }
-
-        /// <summary>
-        ///     Close the connection to the database
-        /// </summary>
-        private void Disconnect()
-        {
-            _connection.Close();
-        }
-
-        public void CreateTable(string sql)
-        {
-            try
-            {
-                Connect();
-                using (_connection)
-                {
-                    SqliteCommand cmd = new SqliteCommand(sql, _connection);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-            catch (SqliteException e)
-            {
-                throw new DatabaseException(e.Message, e);
-            }
-            finally
-            {
-                if (ConnectionOpen())
-                {
-                    Disconnect();
-                }
-            }
-        }
-
-        public bool TableExists(string name)
-        {
-            bool exists;
-            
-            Connect();
-            using (_connection)
-            {
-                const string sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' and name ='@name';";
-                SqliteCommand cmd = new SqliteCommand(sql, _connection);
-                cmd.Parameters.AddWithValue("@name", name);
-                SqliteDataReader reader = cmd.ExecuteReader();
-                
-                exists = reader.HasRows;
-                Disconnect();
-            }
-
-            return exists;
+            return connection;
         }
     }
 }

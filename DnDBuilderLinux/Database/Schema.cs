@@ -1,0 +1,57 @@
+namespace DnDBuilderLinux.Database
+{
+    public static class Schema
+    {
+        public static class Database
+        {
+            public const string Filename = "dndbuilder.sqlite";
+
+            public static class Query
+            {
+                public const string Connect = "Data Source=" + Filename + "; Version=3; Pooling=True;";
+            }
+        }
+        public static class Character
+        {
+            public const string Table = "characters";
+
+            public static class Query
+            {
+                public const string CreateTable = "CREATE TABLE IF NOT EXISTS " +
+                                                  Table + "(" +
+                                                  Field.Name + " varchar(20) primary key, " +
+                                                  Field.Age + " integer, " +
+                                                  Field.Gender + " varchar(20), " +
+                                                  Field.Bio + " varchar(500), " +
+                                                  Field.Level + " integer, " +
+                                                  Field.Race + " varchar(20), " +
+                                                  Field.Class + " varchar(20), " +
+                                                  Field.Caster + " boolean, " +
+                                                  Field.Hp + " integer, " +
+                                                  Field.AbilityScore + " integer)";
+
+                public const string FindTable = "SELECT COUNT(*) FROM sqlite_master WHERE TYPE='table' AND NAME='" +
+                                                Parameter.Name + "';";
+            }
+
+            public static class Parameter
+            {
+                public const string Name = "@name";
+            }
+
+            private static class Field
+            {
+                public const string Name = "name";
+                public const string Age = "age";
+                public const string Gender = "gender";
+                public const string Bio = "biography";
+                public const string Level = "level";
+                public const string Race = "race";
+                public const string Class = "class";
+                public const string Caster = "caster";
+                public const string Hp = "hitpoints";
+                public const string AbilityScore = "ability";
+            }
+        }
+    }
+}

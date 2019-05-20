@@ -68,7 +68,7 @@
     <Compile Include="Controllers\RouteController.cs" />
     <Compile Include="Database\DatabaseException.cs" />
     <Compile Include="Database\DatabaseHandler.cs" />
-    <Compile Include="Database\DndSchema.cs" />
+    <Compile Include="Database\Schema.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

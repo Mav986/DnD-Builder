@@ -8,14 +8,12 @@ namespace DnDBuilderLinux.Tests
     [TestFixture]
     public class TestDatabaseHandler
     {
-        private string _filename;
         private DatabaseHandler _dbHandler;
         
         [SetUp]
         public void SetUp()
         {
-            _filename = "mydb.sqlite";
-            _dbHandler = new DatabaseHandler(_filename);
+            _dbHandler = new DatabaseHandler();
         }
 
         [TearDown]
@@ -23,7 +21,7 @@ namespace DnDBuilderLinux.Tests
         {
             try
             {
-                File.Delete(_filename);
+                File.Delete(Schema.Database.Filename);
             }
             catch (IOException e)
             {
@@ -36,7 +34,7 @@ namespace DnDBuilderLinux.Tests
         {
             try
             {
-                Assert.That(File.Exists(_filename));
+                Assert.That(File.Exists(Schema.Database.Filename));
             }
             catch (Exception e)
             {
@@ -49,9 +47,7 @@ namespace DnDBuilderLinux.Tests
         {
             try
             {
-                _dbHandler.CreateTable(DndSchema.Character.CreateTableQuery);
-                Assert.DoesNotThrow(() => _dbHandler.CreateTable(DndSchema.Character.CreateTableQuery));
-                Assert.True(_dbHandler.TableExists(DndSchema.Character.Table));
+                Assert.True(_dbHandler.TableExists(Schema.Character.Table));
             }
             catch (Exception e)
             {
