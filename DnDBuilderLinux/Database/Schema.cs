@@ -5,11 +5,7 @@ namespace DnDBuilderLinux.Database
         public static class Database
         {
             public const string Filename = "dndbuilder.sqlite";
-
-            public static class Query
-            {
-                public const string Connect = "Data Source=" + Filename + "; Version=3; Pooling=True;";
-            }
+            public const string Connect = "Data Source=" + Filename + "; Version=3; Pooling=True;";
         }
         public static class Character
         {
@@ -18,28 +14,31 @@ namespace DnDBuilderLinux.Database
             public static class Query
             {
                 public const string CreateTable = "CREATE TABLE IF NOT EXISTS " +
-                                                  Table + "(" +
-                                                  Field.Name + " varchar(20) primary key, " +
-                                                  Field.Age + " integer, " +
-                                                  Field.Gender + " varchar(20), " +
-                                                  Field.Bio + " varchar(500), " +
-                                                  Field.Level + " integer, " +
-                                                  Field.Race + " varchar(20), " +
-                                                  Field.Class + " varchar(20), " +
-                                                  Field.Caster + " boolean, " +
-                                                  Field.Hp + " integer, " +
-                                                  Field.AbilityScore + " integer)";
-
-                public const string FindTable = "SELECT COUNT(*) FROM sqlite_master WHERE TYPE='table' AND NAME='" +
-                                                Parameter.Name + "';";
+                                                   Table + "(" +
+                                                   Field.Name + " varchar(20) primary key, " +
+                                                   Field.Age + " integer, " +
+                                                   Field.Gender + " varchar(20), " +
+                                                   Field.Bio + " varchar(500), " +
+                                                   Field.Level + " integer, " +
+                                                   Field.Race + " varchar(20), " +
+                                                   Field.Class + " varchar(20), " +
+                                                   Field.Caster + " boolean, " +
+                                                   Field.Hp + " integer, " +
+                                                   Field.AbilityScore + " integer)";
+                
+                public const string FindTable = "SELECT COUNT(*) FROM sqlite_master WHERE TYPE='table' AND NAME=@name";
+                
+                public const string InsertCharacter = "INSERT INTO " + Table + 
+                                                      "(" + Field.Name + ") VALUES (@name)";
+                
+                public const string FindCharacter = "SELECT COUNT(*) FROM " + Table + 
+                                                    " WHERE " + Field.Name + "=@name";
+                
+                public const string SelectCharacter = "SELECT * FROM " + Table + 
+                                                      " WHERE " + Field.Name + "=@name";
             }
 
-            public static class Parameter
-            {
-                public const string Name = "@name";
-            }
-
-            private static class Field
+            public static class Field
             {
                 public const string Name = "name";
                 public const string Age = "age";
@@ -52,6 +51,11 @@ namespace DnDBuilderLinux.Database
                 public const string Hp = "hitpoints";
                 public const string AbilityScore = "ability";
             }
+        }
+
+        public static class Param
+        {
+            public const string Name = "@name";
         }
     }
 }

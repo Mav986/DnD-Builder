@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DnDBuilderLinux.Handlers
 {
-    public class CharacterHandler
+    public class Dnd5EHandler
     {
         private readonly RequestHandler _reqHandler;
 
@@ -12,7 +12,7 @@ namespace DnDBuilderLinux.Handlers
         ///     Retrieves race data from dnd5eapi.co
         /// </summary>
         /// <param name="reqHandler">A RequestHandler object</param>
-        public CharacterHandler(RequestHandler reqHandler)
+        public Dnd5EHandler(RequestHandler reqHandler)
         {
             _reqHandler = reqHandler;
         }

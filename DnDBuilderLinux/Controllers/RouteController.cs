@@ -10,7 +10,7 @@ namespace DnDBuilderLinux.Controllers
 {
     public class RouteController : ApiController
     {
-        private readonly CharacterHandler _charHandler;
+        private readonly Dnd5EHandler _charHandler;
 
         /// <inheritdoc />
         /// <summary>
@@ -19,7 +19,7 @@ namespace DnDBuilderLinux.Controllers
         public RouteController()
         {
             var reqHandler = new RequestHandler("http://www.dnd5eapi.co/api/", new CacheHandler());
-            _charHandler = new CharacterHandler(reqHandler);
+            _charHandler = new Dnd5EHandler(reqHandler);
         }
 
         /// <summary>

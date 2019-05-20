@@ -73,7 +73,8 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Handlers\CharacterHandler.cs" />
+    <Compile Include="Handlers\Dnd5eHandler.cs" />
+    <Compile Include="Models\Character.cs" />
     <Compile Include="Web\CacheHandler.cs" />
     <Compile Include="Web\RequestHandler.cs" />
   </ItemGroup>

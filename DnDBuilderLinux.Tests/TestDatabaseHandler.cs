@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using DnDBuilderLinux.Database;
+using DnDBuilderLinux.Models;
 using NUnit.Framework;
 
 namespace DnDBuilderLinux.Tests
@@ -8,16 +9,17 @@ namespace DnDBuilderLinux.Tests
     [TestFixture]
     public class TestDatabaseHandler
     {
+        private const string Name = "Test";
         private DatabaseHandler _dbHandler;
         
-        [SetUp]
-        public void SetUp()
+        [TestFixtureSetUp]
+        public void GlobalSetup()
         {
             _dbHandler = new DatabaseHandler();
         }
 
-        [TearDown]
-        public void TearDown()
+        [TestFixtureTearDown]
+        public void GlobalTeardown()
         {
             try
             {
@@ -25,12 +27,12 @@ namespace DnDBuilderLinux.Tests
             }
             catch (IOException e)
             {
-                Console.WriteLine(e);
+                Fail(e);
             }
         }
         
         [Test]
-        public void Creation()
+        public void CreateDatabase()
         {
             try
             {
@@ -38,12 +40,12 @@ namespace DnDBuilderLinux.Tests
             }
             catch (Exception e)
             {
-                Assert.Fail(e + "\n\n" + e.StackTrace);
+                Fail(e);
             }
         }
 
         [Test]
-        public void TableCreation()
+        public void CreateTable()
         {
             try
             {
@@ -51,8 +53,42 @@ namespace DnDBuilderLinux.Tests
             }
             catch (Exception e)
             {
-                Assert.Fail(e + "\n\n" + e.StackTrace);
+                Fail(e);
             }
+        }
+
+        [Test]
+        public void Add()
+        {
+            try
+            {
+                Character testChar = new Character {Name = Name};
+                _dbHandler.AddCharacter(testChar);
+
+                Assert.Throws<DatabaseException>(() => _dbHandler.AddCharacter(testChar));
+            }
+            catch (Exception e)
+            {
+                Fail(e);
+            }
+        }
+
+        [Test]
+        public void Get()
+        {
+            Character testChar = new Character {Name = "Hi"};
+            _dbHandler.AddCharacter(testChar);
+            Assert.DoesNotThrow(() => _dbHandler.GetCharacter(testChar.Name));
+
+            Character compareChar = _dbHandler.GetCharacter(testChar.Name);
+            Assert.True(compareChar.Name == testChar.Name);
+            
+            Assert.IsNull(_dbHandler.GetCharacter("FakeCharacter"));
+        }
+
+        private static void Fail(Exception e)
+        {
+            Assert.Fail(e + "\n\n" + e.StackTrace);
         }
     }
 }
