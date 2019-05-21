@@ -6,14 +6,16 @@ namespace DnDBuilderLinux.Models
     {
         private string _name;
         private int _age;
-        private string _gender;
         private string _biography;
         private int _level;
-        private string _race;
-        private string _class;
         private bool _caster;
-        private int _hitpoints;
-        private int _abilityScore;
+        
+        private int _con;
+        private int _dex;
+        private int _str;
+        private int _cha;
+        private int _intel;
+        private int _wis;
 
         public string Name
         {
@@ -35,11 +37,7 @@ namespace DnDBuilderLinux.Models
             }
         }
 
-        public string Gender
-        {
-            get => _gender;
-            set => _gender = value;
-        }
+        public string Gender { get; set; }
 
         public string Biography
         {
@@ -47,7 +45,7 @@ namespace DnDBuilderLinux.Models
             set
             {
                 if (value.Length <= 500) _biography = value;
-                else throw new ArgumentException("Biography must be less than 500 characters");
+                else throw new ArgumentException("Biography must not be more than 500 characters");
             }
         }
 
@@ -63,14 +61,14 @@ namespace DnDBuilderLinux.Models
 
         public string Race
         {
-            get => _race;
-            set => _race = value; // Race will be a preset string from a dropdown box
+            get;
+            set; // Race will be a preset string from a dropdown box
         }
 
         public string Class
         {
-            get => _class;
-            set => _class = value; // Class will be a preset string from a dropdown box
+            get;
+            set; // Class will be a preset string from a dropdown box
         }
 
         public bool Caster
@@ -79,16 +77,42 @@ namespace DnDBuilderLinux.Models
             set => _caster = value;
         }
 
-        public int Hitpoints
+        public int Hitpoints { get; set; }
+
+        public int Con
         {
-            get => _hitpoints;
-            set => _hitpoints = value;
+            get => _con;
+            set => _con = value;
         }
 
-        public int AbilityScore
+        public int Dex
         {
-            get => _abilityScore;
-            set => _abilityScore = value;
+            get => _dex;
+            set => _dex = value;
+        }
+
+        public int Str
+        {
+            get => _str;
+            set => _str = value;
+        }
+
+        public int Cha
+        {
+            get => _cha;
+            set => _cha = value;
+        }
+
+        public int Intel
+        {
+            get => _intel;
+            set => _intel = value;
+        }
+
+        public int Wis
+        {
+            get => _wis;
+            set => _wis = value;
         }
     }
 }

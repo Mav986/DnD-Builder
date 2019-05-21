@@ -21,11 +21,10 @@ namespace DnDBuilderLinux.Database
                 {
                     SqliteCommand checkDuplicates = new SqliteCommand(Schema.Character.Query.FindCharacter, dbConn);
                     checkDuplicates.Parameters.AddWithValue(Schema.Param.Name, character.Name);
-                    
                     int count = Convert.ToInt32(checkDuplicates.ExecuteScalar());
                     if (count > 0) throw new DatabaseException("Character already exists");
 
-                    SqliteCommand insert = new SqliteCommand(Schema.Character.Query.InsertCharacter, dbConn);
+                    SqliteCommand insert = GetAddCommand(character, dbConn);
                     insert.Parameters.AddWithValue(Schema.Param.Name, character.Name);
                     insert.ExecuteNonQuery();
                 }
@@ -88,6 +87,27 @@ namespace DnDBuilderLinux.Database
             }
 
             return exists;
+        }
+
+        private SqliteCommand GetAddCommand(Character character, SqliteConnection dbConn)
+        {
+            SqliteCommand command = new SqliteCommand(Schema.Character.Query.InsertCharacter, dbConn);
+            command.Parameters.AddWithValue(Schema.Character.Field.Name, character.Name);
+            command.Parameters.AddWithValue(Schema.Character.Field.Age, character.Age);
+            command.Parameters.AddWithValue(Schema.Character.Field.Gender, character.Gender);
+            command.Parameters.AddWithValue(Schema.Character.Field.Level, character.Level);
+            command.Parameters.AddWithValue(Schema.Character.Field.Race, character.Race);
+            command.Parameters.AddWithValue(Schema.Character.Field.Class, character.Class);
+            command.Parameters.AddWithValue(Schema.Character.Field.Caster, character.Caster);
+            command.Parameters.AddWithValue(Schema.Character.Field.Hp, character.Hitpoints);
+            command.Parameters.AddWithValue(Schema.Character.Field.Constitution, character.Con);
+            command.Parameters.AddWithValue(Schema.Character.Field.Dexterity, character.Dex);
+            command.Parameters.AddWithValue(Schema.Character.Field.Strength, character.Str);
+            command.Parameters.AddWithValue(Schema.Character.Field.Charisma, character.Cha);
+            command.Parameters.AddWithValue(Schema.Character.Field.Intelligence, character.Intel);
+            command.Parameters.AddWithValue(Schema.Character.Field.Wisdom, character.Wis);
+
+            return command;
         }
 
         /// <summary>

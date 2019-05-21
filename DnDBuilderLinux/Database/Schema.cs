@@ -24,7 +24,12 @@ namespace DnDBuilderLinux.Database
                                                    Field.Class + " varchar(20), " +
                                                    Field.Caster + " boolean, " +
                                                    Field.Hp + " integer, " +
-                                                   Field.AbilityScore + " integer)";
+                                                   Field.Constitution + " integer, " +
+                                                   Field.Dexterity + " integer, " +
+                                                   Field.Strength + " integer, " +
+                                                   Field.Charisma + " integer, " +
+                                                   Field.Intelligence + " integer, " +
+                                                   Field.Wisdom + " integer)";
                 
                 public const string FindTable = "SELECT COUNT(*) FROM sqlite_master WHERE TYPE='table' AND NAME=@name";
                 
@@ -49,7 +54,12 @@ namespace DnDBuilderLinux.Database
                 public const string Class = "class";
                 public const string Caster = "caster";
                 public const string Hp = "hitpoints";
-                public const string AbilityScore = "ability";
+                public const string Constitution = "con";
+                public const string Dexterity = "dex";
+                public const string Strength = "str";
+                public const string Charisma = "cha";
+                public const string Intelligence = "int";
+                public const string Wisdom = "wis";
             }
         }
 
