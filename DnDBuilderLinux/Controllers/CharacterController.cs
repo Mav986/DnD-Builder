@@ -1,22 +1,26 @@
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using DnDBuilderLinux.Database;
 using DnDBuilderLinux.Handlers;
 using Newtonsoft.Json.Linq;
 
 namespace DnDBuilderLinux.Controllers
 {
-    public class CharacterRoute : ApiController
+    [RoutePrefix("character")]
+    public class CharacterController : ApiController
     {
         private readonly CharacterHandler _charHandler;
         
-        public CharacterRoute()
+        public CharacterController()
         {
-            _charHandler = new CharacterHandler();
+            DatabaseHandler db = new DatabaseHandler();
+            _charHandler = new CharacterHandler(db);
         }
 
         [HttpPost]
-        [Route("add/character")]
+        [Route("add")]
         public void AddCharacter([FromBody] JObject charData)
         {
             try
@@ -27,6 +31,10 @@ namespace DnDBuilderLinux.Controllers
             {
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
                     "Error: " + e.Message));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
         }
     }

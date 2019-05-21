@@ -33,8 +33,24 @@ namespace DnDBuilderLinux.Database
                 
                 public const string FindTable = "SELECT COUNT(*) FROM sqlite_master WHERE TYPE='table' AND NAME=@name";
                 
-                public const string InsertCharacter = "INSERT INTO " + Table + 
-                                                      "(" + Field.Name + ") VALUES (@name)";
+                public const string InsertCharacter = "INSERT INTO " + Table + "(" + 
+                                                      Field.Name + ", " + 
+                                                      Field.Age + ", " + 
+                                                      Field.Gender + ", " + 
+                                                      Field.Bio + ", " +
+                                                      Field.Level + ", " + 
+                                                      Field.Race + ", " +
+                                                      Field.Class + ", " +
+                                                      Field.Caster + ", " +
+                                                      Field.Hp + ", " +
+                                                      Field.Constitution + ", " +
+                                                      Field.Dexterity + ", " +
+                                                      Field.Strength + ", " +
+                                                      Field.Charisma + ", " +
+                                                      Field.Intelligence + ", " +
+                                                      Field.Wisdom +
+                                                      ") VALUES (@name, @age, @gender, @bio, @level, @race, " +
+                                                      "@class, @caster, @hp, @con, @dex, @str, @cha, @intel, @wis)";
                 
                 public const string FindCharacter = "SELECT COUNT(*) FROM " + Table + 
                                                     " WHERE " + Field.Name + "=@name";
@@ -43,17 +59,17 @@ namespace DnDBuilderLinux.Database
                                                       " WHERE " + Field.Name + "=@name";
             }
 
-            public static class Field
+            private static class Field
             {
                 public const string Name = "name";
                 public const string Age = "age";
                 public const string Gender = "gender";
-                public const string Bio = "biography";
+                public const string Bio = "bio";
                 public const string Level = "level";
                 public const string Race = "race";
                 public const string Class = "class";
                 public const string Caster = "caster";
-                public const string Hp = "hitpoints";
+                public const string Hp = "hp";
                 public const string Constitution = "con";
                 public const string Dexterity = "dex";
                 public const string Strength = "str";

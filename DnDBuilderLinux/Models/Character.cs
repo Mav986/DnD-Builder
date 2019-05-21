@@ -6,10 +6,13 @@ namespace DnDBuilderLinux.Models
     {
         private string _name;
         private int _age;
+        private string _gender;
         private string _biography;
         private int _level;
-        private bool _caster;
-        
+        private string _race;
+        private string _class;
+        private int _hp;
+
         private int _con;
         private int _dex;
         private int _str;
@@ -37,7 +40,11 @@ namespace DnDBuilderLinux.Models
             }
         }
 
-        public string Gender { get; set; }
+        public string Gender
+        {
+            get => _gender; 
+            set => _gender = value;
+        }
 
         public string Biography
         {
@@ -61,23 +68,26 @@ namespace DnDBuilderLinux.Models
 
         public string Race
         {
-            get;
-            set; // Race will be a preset string from a dropdown box
+            get => _race;
+            set => _race = value; // Race will be a preset string from a dropdown box
         }
 
         public string Class
         {
-            get;
-            set; // Class will be a preset string from a dropdown box
+            get => _class;
+            set => _class = value; // Class will be a preset string from a dropdown box
         }
 
         public bool Caster
         {
-            get => _caster;
-            set => _caster = value;
+            get;
         }
 
-        public int Hitpoints { get; set; }
+        public int Hitpoints
+        {
+            get => _hp;
+            set => _hp = value;
+        }
 
         public int Con
         {
@@ -113,6 +123,13 @@ namespace DnDBuilderLinux.Models
         {
             get => _wis;
             set => _wis = value;
+        }
+
+        public override string ToString()
+        {
+            return Name + "\n" + Age + "\n" + Gender + "\n"  + Biography + "\n" + Level +
+                   "\n" + Race + "\n" + Class + "\n" + Caster + "\n" + Hitpoints + "\n" +
+                   + Con + "\n" + Dex + "\n" + Str + "\n" + Cha + "\n" + Intel + "\n" + Wis;
         }
     }
 }

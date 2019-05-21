@@ -8,7 +8,8 @@ using Newtonsoft.Json.Linq;
 
 namespace DnDBuilderLinux.Controllers
 {
-    public class Dnd5ERoute : ApiController
+    [RoutePrefix("dnd")]
+    public class Dnd5EController : ApiController
     {
         private readonly Dnd5EHandler _dndHandler;
 
@@ -16,7 +17,7 @@ namespace DnDBuilderLinux.Controllers
         /// <summary>
         ///     Store and retrieve DnD race data
         /// </summary>
-        public Dnd5ERoute()
+        public Dnd5EController()
         {
             RequestHandler reqHandler = new RequestHandler("http://www.dnd5eapi.co/api/", new CacheHandler());
             _dndHandler = new Dnd5EHandler(reqHandler);

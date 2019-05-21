@@ -9,13 +9,50 @@ namespace DnDBuilderLinux.Tests
     [TestFixture]
     public class TestDatabaseHandler
     {
-        private const string Name = "Test";
+        private Character _testCharOne;
+        private Character _testCharTwo;
         private DatabaseHandler _dbHandler;
         
         [TestFixtureSetUp]
         public void GlobalSetup()
         {
             _dbHandler = new DatabaseHandler();
+            
+            _testCharOne = new Character
+            {
+                Name = "testCharOne",
+                Age = 499,
+                Gender = "Your mom's house",
+                Biography = "Lorem Ipsum Here",
+                Level = 2,
+                Race = "human",
+                Class = "barbarian",
+                Hitpoints = 42,
+                Con = 1,
+                Dex = 2,
+                Str = 3,
+                Cha = 4,
+                Intel = 5,
+                Wis = 6
+            };
+            
+            _testCharTwo = new Character
+            {
+                Name = "testCharTwo",
+                Age = 1,
+                Gender = "",
+                Biography = "",
+                Level = 19,
+                Race = "elf",
+                Class = "paladin",
+                Hitpoints = 1,
+                Con = 6,
+                Dex = 5,
+                Str = 4,
+                Cha = 3,
+                Intel = 2,
+                Wis = 1
+            };
         }
 
         [TestFixtureTearDown]
@@ -58,14 +95,13 @@ namespace DnDBuilderLinux.Tests
         }
 
         [Test]
-        public void Add()
+        public void AddCharacter()
         {
             try
             {
-                Character testChar = new Character {Name = Name};
-                _dbHandler.AddCharacter(testChar);
-
-                Assert.Throws<DatabaseException>(() => _dbHandler.AddCharacter(testChar));
+                Assert.DoesNotThrow(() => _dbHandler.AddCharacter(_testCharOne));
+                Assert.Throws<DatabaseException>(() => _dbHandler.AddCharacter(_testCharOne));
+                Assert.DoesNotThrow(() => _dbHandler.AddCharacter(_testCharTwo));
             }
             catch (Exception e)
             {
@@ -74,16 +110,23 @@ namespace DnDBuilderLinux.Tests
         }
 
         [Test]
-        public void Get()
+        public void GetCharacter()
         {
-            Character testChar = new Character {Name = "Hi"};
-            _dbHandler.AddCharacter(testChar);
-            Assert.DoesNotThrow(() => _dbHandler.GetCharacter(testChar.Name));
+            try
+            {
+                Character compareChar = null;
+                Assert.DoesNotThrow(() => compareChar = _dbHandler.GetCharacter(_testCharOne.Name));
+                Assert.True(_testCharOne.Name == compareChar.Name);
 
-            Character compareChar = _dbHandler.GetCharacter(testChar.Name);
-            Assert.True(compareChar.Name == testChar.Name);
-            
-            Assert.IsNull(_dbHandler.GetCharacter("FakeCharacter"));
+                Assert.DoesNotThrow(() => compareChar = _dbHandler.GetCharacter(_testCharTwo.Name));
+                Assert.True(compareChar.Name == _testCharTwo.Name);
+
+                Assert.IsNull(_dbHandler.GetCharacter("FakeCharacter"));
+            }
+            catch (Exception e)
+            {
+                Fail(e);
+            }
         }
 
         private static void Fail(Exception e)

@@ -24,8 +24,8 @@ namespace DnDBuilderLinux.Database
                     int count = Convert.ToInt32(checkDuplicates.ExecuteScalar());
                     if (count > 0) throw new DatabaseException("Character already exists");
 
-                    SqliteCommand insert = GetAddCommand(character, dbConn);
-                    insert.Parameters.AddWithValue(Schema.Param.Name, character.Name);
+                    SqliteCommand insert = new SqliteCommand(Schema.Character.Query.InsertCharacter, dbConn);
+                    insert = AddParameters(character, insert);
                     insert.ExecuteNonQuery();
                 }
             }
@@ -89,23 +89,24 @@ namespace DnDBuilderLinux.Database
             return exists;
         }
 
-        private SqliteCommand GetAddCommand(Character character, SqliteConnection dbConn)
+        private SqliteCommand AddParameters(Character character, SqliteCommand command)
         {
-            SqliteCommand command = new SqliteCommand(Schema.Character.Query.InsertCharacter, dbConn);
-            command.Parameters.AddWithValue(Schema.Character.Field.Name, character.Name);
-            command.Parameters.AddWithValue(Schema.Character.Field.Age, character.Age);
-            command.Parameters.AddWithValue(Schema.Character.Field.Gender, character.Gender);
-            command.Parameters.AddWithValue(Schema.Character.Field.Level, character.Level);
-            command.Parameters.AddWithValue(Schema.Character.Field.Race, character.Race);
-            command.Parameters.AddWithValue(Schema.Character.Field.Class, character.Class);
-            command.Parameters.AddWithValue(Schema.Character.Field.Caster, character.Caster);
-            command.Parameters.AddWithValue(Schema.Character.Field.Hp, character.Hitpoints);
-            command.Parameters.AddWithValue(Schema.Character.Field.Constitution, character.Con);
-            command.Parameters.AddWithValue(Schema.Character.Field.Dexterity, character.Dex);
-            command.Parameters.AddWithValue(Schema.Character.Field.Strength, character.Str);
-            command.Parameters.AddWithValue(Schema.Character.Field.Charisma, character.Cha);
-            command.Parameters.AddWithValue(Schema.Character.Field.Intelligence, character.Intel);
-            command.Parameters.AddWithValue(Schema.Character.Field.Wisdom, character.Wis);
+            // All key string's must match key from Schema
+            command.Parameters.AddWithValue("@name", character.Name);
+            command.Parameters.AddWithValue("@age", character.Age);
+            command.Parameters.AddWithValue("@gender", character.Gender);
+            command.Parameters.AddWithValue("@bio", character.Biography);
+            command.Parameters.AddWithValue("@level", character.Level);
+            command.Parameters.AddWithValue("@race", character.Race);
+            command.Parameters.AddWithValue("@class", character.Class);
+            command.Parameters.AddWithValue("@caster", character.Caster);
+            command.Parameters.AddWithValue("@hp", character.Hitpoints);
+            command.Parameters.AddWithValue("@con", character.Con);
+            command.Parameters.AddWithValue("@dex", character.Dex);
+            command.Parameters.AddWithValue("@str", character.Str);
+            command.Parameters.AddWithValue("@cha", character.Cha);
+            command.Parameters.AddWithValue("@intel", character.Intel);
+            command.Parameters.AddWithValue("@wis", character.Wis);
 
             return command;
         }
