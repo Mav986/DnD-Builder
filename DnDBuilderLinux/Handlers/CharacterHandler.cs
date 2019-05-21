@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using DnDBuilderLinux.Database;
 using DnDBuilderLinux.Models;
+using Newtonsoft.Json.Linq;
 
 namespace DnDBuilderLinux.Handlers
 {
@@ -26,6 +28,27 @@ namespace DnDBuilderLinux.Handlers
             {
                 throw new CharacterException(e.Message, e);
             }
+        }
+
+        public JArray GetAllCharacters()
+        {
+            List<Character> charList = _db.SelectAll();
+            JArray jsonList = new JArray();
+
+            foreach (Character c in charList)
+            {
+                JObject charDetails = new JObject
+                {
+                    [Schema.Character.Field.Name] = c.Name, 
+                    [Schema.Character.Field.Race] = c.Race, 
+                    [Schema.Character.Field.Class] = c.Class, 
+                    [Schema.Character.Field.Level] = c.Level
+                };
+                
+                jsonList.Add(charDetails);
+            }
+
+            return jsonList;
         }
     }
 }

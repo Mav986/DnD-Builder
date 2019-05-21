@@ -4,6 +4,7 @@ using System.Web.Http;
 using DnDBuilderLinux.Database;
 using DnDBuilderLinux.Handlers;
 using DnDBuilderLinux.Models;
+using Newtonsoft.Json.Linq;
 
 namespace DnDBuilderLinux.Controllers
 {
@@ -30,6 +31,21 @@ namespace DnDBuilderLinux.Controllers
             catch (CharacterException e)
             {
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
+                    "Error: " + e.Message));
+            }
+        }
+
+        [HttpGet]
+        [Route("view/all")]
+        public JArray GetCharacters()
+        {
+            try
+            {
+                return _charHandler.GetAllCharacters();
+            }
+            catch (CharacterException e)
+            {
+                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
                     "Error: " + e.Message));
             }
         }

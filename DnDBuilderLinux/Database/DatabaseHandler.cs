@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using DnDBuilderLinux.Models;
 using Mono.Data.Sqlite;
@@ -87,6 +88,51 @@ namespace DnDBuilderLinux.Database
             }
 
             return exists;
+        }
+
+        public List<Character> SelectAll()
+        {
+            try
+            {
+                List<Character> charList = new List<Character>();
+                using (SqliteConnection dbConn = GetConnection())
+                {
+                    SqliteCommand cmd = new SqliteCommand(Schema.Character.Query.SelectAll, dbConn);
+                    SqliteDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        charList.Add(ConvertToCharacter(reader));
+                    }
+                }
+
+                return charList;
+            }
+            catch (SqliteException e)
+            {
+                throw new DatabaseException(e.Message, e);
+            }
+        }
+
+        private Character ConvertToCharacter(SqliteDataReader reader)
+        {
+            return new Character
+            {
+                Name = (string) reader[Schema.Character.Field.Name],
+                Age = (long) reader[Schema.Character.Field.Age],
+                Gender = (string) reader[Schema.Character.Field.Gender],
+                Biography = (string) reader[Schema.Character.Field.Bio],
+                Level = (long) reader[Schema.Character.Field.Level],
+                Race = (string) reader[Schema.Character.Field.Race],
+                Class = (string) reader[Schema.Character.Field.Class],
+                Caster = (bool) reader[Schema.Character.Field.Caster],
+                Hitpoints = (long) reader[Schema.Character.Field.Hp],
+                Con = (long) reader[Schema.Character.Field.Constitution],
+                Dex = (long) reader[Schema.Character.Field.Dexterity],
+                Str = (long) reader[Schema.Character.Field.Strength],
+                Cha = (long) reader[Schema.Character.Field.Charisma],
+                Intel = (long) reader[Schema.Character.Field.Intelligence],
+                Wis = (long) reader[Schema.Character.Field.Wisdom]
+            };
         }
 
         private SqliteCommand AddParameters(Character character, SqliteCommand command)

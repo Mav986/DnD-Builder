@@ -57,9 +57,11 @@ namespace DnDBuilderLinux.Database
                 
                 public const string SelectCharacter = "SELECT * FROM " + Table + 
                                                       " WHERE " + Field.Name + "=@name";
+
+                public const string SelectAll = "SELECT * FROM " + Table;
             }
 
-            private static class Field
+            public static class Field
             {
                 public const string Name = "name";
                 public const string Age = "age";

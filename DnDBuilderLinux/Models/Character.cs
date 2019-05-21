@@ -6,20 +6,20 @@ namespace DnDBuilderLinux.Models
     public class Character
     {
         private string _name;
-        private int _age;
+        private long _age;
         private string _gender;
         private string _biography;
-        private int _level;
+        private long _level;
         private string _race;
         private string _class;
-        private int _hp;
+        private long _hp;
 
-        private int _con;
-        private int _dex;
-        private int _str;
-        private int _cha;
-        private int _intel;
-        private int _wis;
+        private long _con;
+        private long _dex;
+        private long _str;
+        private long _cha;
+        private long _intel;
+        private long _wis;
 
         [Required]
         public string Name
@@ -28,7 +28,7 @@ namespace DnDBuilderLinux.Models
             set => _name = value;
         }
 
-        public int Age
+        public long Age
         {
             get => _age;
             set
@@ -54,7 +54,7 @@ namespace DnDBuilderLinux.Models
             }
         }
 
-        public int Level
+        public long Level
         {
             get => _level;
             set
@@ -82,43 +82,43 @@ namespace DnDBuilderLinux.Models
             set;
         }
 
-        public int Hitpoints
+        public long Hitpoints
         {
             get => _hp;
             set => _hp = value;
         }
 
-        public int Con
+        public long Con
         {
             get => _con;
             set => _con = value;
         }
 
-        public int Dex
+        public long Dex
         {
             get => _dex;
             set => _dex = value;
         }
 
-        public int Str
+        public long Str
         {
             get => _str;
             set => _str = value;
         }
 
-        public int Cha
+        public long Cha
         {
             get => _cha;
             set => _cha = value;
         }
 
-        public int Intel
+        public long Intel
         {
             get => _intel;
             set => _intel = value;
         }
 
-        public int Wis
+        public long Wis
         {
             get => _wis;
             set => _wis = value;
