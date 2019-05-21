@@ -21,7 +21,7 @@ namespace DnDBuilderLinux.Models
         private long _intel;
         private long _wis;
 
-        [Required]
+        [Required(ErrorMessage = "Character name is required")]
         public string Name
         {
             get => _name;

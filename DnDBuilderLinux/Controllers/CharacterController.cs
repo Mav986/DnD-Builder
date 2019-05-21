@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
@@ -28,10 +29,11 @@ namespace DnDBuilderLinux.Controllers
                 if (!ModelState.IsValid) throw new CharacterException("Character invalid");
                 _charHandler.AddCharacter(charData);
             }
-            catch (CharacterException e)
+            catch (CharacterException)
             {
+                // Best practice: log stack trace here
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
-                    "Error: " + e.Message));
+                    "Something went wrong. Please check your data and try again."));
             }
         }
 
@@ -43,10 +45,27 @@ namespace DnDBuilderLinux.Controllers
             {
                 return _charHandler.GetAllCharacters();
             }
-            catch (CharacterException e)
+            catch (CharacterException)
             {
+                // Best practice: log stack trace here
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
-                    "Error: " + e.Message));
+                    "Something went wrong. Please contact a server administrator."));
+            }
+        }
+
+        [HttpPut]
+        [Route("update")]
+        public void UpdateCharacter([FromBody] JObject newData)
+        {
+            try
+            {
+                _charHandler.UpdateCharacter(newData);
+            }
+            catch (Exception)
+            {
+                // Best practice: log stack trace here
+                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
+                    "Something went wrong. Please check your data and try again."));
             }
         }
     }

@@ -50,5 +50,24 @@ namespace DnDBuilderLinux.Handlers
 
             return jsonList;
         }
+
+        public void UpdateCharacter(JObject newData)
+        {
+            try
+            {
+                string name = (string) newData[Schema.Character.Field.Name];
+                newData.Remove(Schema.Character.Field.Name);
+                foreach (JProperty property in newData.Properties())
+                {
+                    string key = property.Name;
+                    string value = property.Value.ToString();
+                    _db.UpdateCharacter(name, key, value);
+                }
+            }   
+            catch (DatabaseException e)
+            {
+                throw new CharacterException(e.Message, e);
+            }
+        }
     }
 }
