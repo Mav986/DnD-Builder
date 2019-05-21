@@ -56,13 +56,13 @@ namespace DnDBuilderLinux.Web
         /// <exception cref="ArgumentException">Thrown when the JObject does not exist in the JToken</exception>
         public JObject ExtractFromJArray(JToken token, string name)
         {
-            var json = token.Children<JObject>()
+            JObject json = token.Children<JObject>()
                 .FirstOrDefault(r => r["name"].ToString().Equals(name, StringComparison.OrdinalIgnoreCase));
 
             if (json == null) throw new ArgumentException($"{name} not found");
 
-            var key = json["name"].ToString();
-            var url = json["url"].ToString();
+            string key = json["name"].ToString();
+            string url = json["url"].ToString();
 
             return GetFromCache(key, url);
         }
@@ -74,10 +74,10 @@ namespace DnDBuilderLinux.Web
         /// <returns>A JObject of the response body JSON</returns>
         private JObject GetJson(string url)
         {
-            var endpoint = ExtractEndpoint(url);
-            var res = _client.GetAsync(endpoint).Result;
+            string endpoint = ExtractEndpoint(url);
+            HttpResponseMessage res = _client.GetAsync(endpoint).Result;
             res.EnsureSuccessStatusCode();
-            var json = res.Content.ReadAsAsync<JObject>().Result;
+            JObject json = res.Content.ReadAsAsync<JObject>().Result;
 
             return json;
         }
@@ -89,9 +89,9 @@ namespace DnDBuilderLinux.Web
         /// <returns>The endpoint extracted from the base url</returns>
         private string ExtractEndpoint(string url)
         {
-            var baseUrl = _client.BaseAddress.ToString();
+            string baseUrl = _client.BaseAddress.ToString();
             if (!url.StartsWith(baseUrl)) return url;
-            var result = url.Split(new[] {baseUrl}, StringSplitOptions.None);
+            string[] result = url.Split(new[] {baseUrl}, StringSplitOptions.None);
 
             return string.Join("", result);
         }
