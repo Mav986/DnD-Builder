@@ -8,18 +8,18 @@ using Newtonsoft.Json.Linq;
 
 namespace DnDBuilderLinux.Controllers
 {
-    public class RouteController : ApiController
+    public class Dnd5ERoute : ApiController
     {
-        private readonly Dnd5EHandler _charHandler;
+        private readonly Dnd5EHandler _dndHandler;
 
         /// <inheritdoc />
         /// <summary>
         ///     Store and retrieve DnD race data
         /// </summary>
-        public RouteController()
+        public Dnd5ERoute()
         {
-            var reqHandler = new RequestHandler("http://www.dnd5eapi.co/api/", new CacheHandler());
-            _charHandler = new Dnd5EHandler(reqHandler);
+            RequestHandler reqHandler = new RequestHandler("http://www.dnd5eapi.co/api/", new CacheHandler());
+            _dndHandler = new Dnd5EHandler(reqHandler);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace DnDBuilderLinux.Controllers
         {
             try
             {
-                return _charHandler.GetRaces();
+                return _dndHandler.GetRaces();
             }
             catch (Exception e)
             {
@@ -58,7 +58,7 @@ namespace DnDBuilderLinux.Controllers
         {
             try
             {
-                return _charHandler.GetRace(name);
+                return _dndHandler.GetRace(name);
             }
             catch (ArgumentException e)
             {
@@ -76,7 +76,7 @@ namespace DnDBuilderLinux.Controllers
         {
             try
             {
-                return _charHandler.GetClasses();
+                return _dndHandler.GetClasses();
             }
             catch (Exception e)
             {
@@ -91,7 +91,7 @@ namespace DnDBuilderLinux.Controllers
         {
             try
             {
-                return _charHandler.GetClass(name);
+                return _dndHandler.GetClass(name);
             }
             catch (ArgumentException e)
             {
