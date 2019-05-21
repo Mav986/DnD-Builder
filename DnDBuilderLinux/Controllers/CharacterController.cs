@@ -1,10 +1,9 @@
-using System;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using DnDBuilderLinux.Database;
 using DnDBuilderLinux.Handlers;
-using Newtonsoft.Json.Linq;
+using DnDBuilderLinux.Models;
 
 namespace DnDBuilderLinux.Controllers
 {
@@ -21,20 +20,17 @@ namespace DnDBuilderLinux.Controllers
 
         [HttpPost]
         [Route("add")]
-        public void AddCharacter([FromBody] JObject charData)
+        public void AddCharacter([FromBody] Character charData)
         {
             try
             {
+                if (!ModelState.IsValid) throw new CharacterException("Character invalid");
                 _charHandler.AddCharacter(charData);
             }
             catch (CharacterException e)
             {
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
                     "Error: " + e.Message));
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
             }
         }
     }

@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace DnDBuilderLinux.Models
 {
@@ -20,14 +21,11 @@ namespace DnDBuilderLinux.Models
         private int _intel;
         private int _wis;
 
+        [Required]
         public string Name
         {
             get => _name;
-            set
-            {
-                if (value.Length > 0) _name = value;
-                else throw new ArgumentException("Name cannot be empty");
-            }
+            set => _name = value;
         }
 
         public int Age
@@ -81,6 +79,7 @@ namespace DnDBuilderLinux.Models
         public bool Caster
         {
             get;
+            set;
         }
 
         public int Hitpoints

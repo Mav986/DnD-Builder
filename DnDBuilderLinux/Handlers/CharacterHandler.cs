@@ -1,27 +1,26 @@
 using System;
 using DnDBuilderLinux.Database;
 using DnDBuilderLinux.Models;
-using Newtonsoft.Json.Linq;
 
 namespace DnDBuilderLinux.Handlers
 {
     public class CharacterHandler
     {
         private readonly DatabaseHandler _db;
+        private readonly Dnd5EHandler _dndHandler;
         
         public CharacterHandler(DatabaseHandler db)
         {
             _db = db;
+            _dndHandler = new Dnd5EHandler();
         }
         
-        public void AddCharacter(JObject charData)
+        public void AddCharacter(Character charData)
         {
             try
             {
-                if (charData == null) throw new ArgumentException("No character data specified");
-                Character newChar = charData.ToObject<Character>();
-                _db.AddCharacter(newChar);
-
+                charData.Caster = _dndHandler.IsCaster(charData.Class);
+                _db.AddCharacter(charData);
             }
             catch (ArgumentException e)
             {

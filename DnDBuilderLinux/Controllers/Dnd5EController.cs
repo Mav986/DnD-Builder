@@ -3,7 +3,6 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using DnDBuilderLinux.Handlers;
-using DnDBuilderLinux.Web;
 using Newtonsoft.Json.Linq;
 
 namespace DnDBuilderLinux.Controllers
@@ -19,8 +18,7 @@ namespace DnDBuilderLinux.Controllers
         /// </summary>
         public Dnd5EController()
         {
-            RequestHandler reqHandler = new RequestHandler("http://www.dnd5eapi.co/api/", new CacheHandler());
-            _dndHandler = new Dnd5EHandler(reqHandler);
+            _dndHandler = new Dnd5EHandler();
         }
 
         /// <summary>

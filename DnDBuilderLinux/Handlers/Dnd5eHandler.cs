@@ -11,10 +11,9 @@ namespace DnDBuilderLinux.Handlers
         /// <summary>
         ///     Retrieves race data from dnd5eapi.co
         /// </summary>
-        /// <param name="reqHandler">A RequestHandler object</param>
-        public Dnd5EHandler(RequestHandler reqHandler)
+        public Dnd5EHandler()
         {
-            _reqHandler = reqHandler;
+            _reqHandler = new RequestHandler("http://www.dnd5eapi.co/api/", new CacheHandler());
         }
 
         /// <summary>
@@ -67,6 +66,12 @@ namespace DnDBuilderLinux.Handlers
             var json = _reqHandler.ExtractFromJArray(allClasses, name);
 
             return json;
+        }
+
+        public bool IsCaster(string className)
+        {
+            JObject classJson = GetClass(className);
+            return classJson["spellcasting"] != null;
         }
     }
 }
