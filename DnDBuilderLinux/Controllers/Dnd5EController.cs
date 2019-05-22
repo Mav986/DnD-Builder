@@ -26,7 +26,7 @@ namespace DnDBuilderLinux.Controllers
         /// </summary>
         /// <returns>A JObject containing all DnD 5e races</returns>
         /// <exception cref="HttpResponseException">
-        ///     Thrown anytime there is a problem retrieving race data from origin server
+        ///     If there is a problem retrieving race data from origin server
         /// </exception>
         [HttpGet]
         [Route("races")]
@@ -40,14 +40,17 @@ namespace DnDBuilderLinux.Controllers
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
-                    "Something went wrong. Please check your data and try again. " +
-                    "If the problem persists, contact a server administrator"));
+                    "Something went wrong. If the problem persists, contact a server administrator"));
             }
         }
 
         /// <summary>
+        ///     GET all classes
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A JObject containing all DnD 5e classes</returns>
+        /// <exception cref="HttpResponseException">
+        ///    If there is a problem retreiving class data from origin server
+        /// </exception>
         [HttpGet]
         [Route("classes")]
         public JObject GetClasses()
@@ -58,8 +61,9 @@ namespace DnDBuilderLinux.Controllers
             }
             catch (Exception e)
             {
+                Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
-                    "Error: " + e.Message));
+                    "Something went wrong. If the problem persists, contact a server administrator"));
             }
         }
     }
