@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
 
@@ -45,23 +44,6 @@ namespace DnDBuilderLinux.Web
             }
 
             return res;
-        }
-
-        /// <summary>
-        ///     Extract a child JObject from a JToken
-        /// </summary>
-        /// <param name="token">JToken to extract JObject from</param>
-        /// <param name="name">Name of the JObject to be extracted</param>
-        /// <returns>The specified JObject</returns>
-        /// <exception cref="ArgumentException">Thrown when the JObject does not exist in the JToken</exception>
-        public JObject ExtractFromJArray(JToken token, string name)
-        {
-            JObject json = token.Children<JObject>()
-                .FirstOrDefault(r => r["name"].ToString().Equals(name, StringComparison.OrdinalIgnoreCase));
-
-            if (json == null) throw new ArgumentException($"{name} not found");
-
-            return json;
         }
 
         /// <summary>
