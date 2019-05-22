@@ -22,19 +22,17 @@ namespace DnDBuilderLinux.Controllers
         }
 
         /// <summary>
-        ///     GET all races
+        ///     Get the names and DnD5eapi urls for all races
         /// </summary>
-        /// <returns>A JObject containing all DnD 5e races</returns>
-        /// <exception cref="HttpResponseException">
-        ///     If there is a problem retrieving race data from origin server
-        /// </exception>
+        /// <returns>JSON containing all DnD 5e race names and urls</returns>
+        /// <exception cref="HttpResponseException"></exception>
         [HttpGet]
         [Route("races")]
         public JObject GetRaces()
         {
             try
             {
-                return _dndHandler.GetRaces();
+                return _dndHandler.GetAllRaces();
             }
             catch (Exception e)
             {
@@ -45,19 +43,17 @@ namespace DnDBuilderLinux.Controllers
         }
 
         /// <summary>
-        ///     GET all classes
+        ///     Get the names and DnD5eapi urls for all races
         /// </summary>
-        /// <returns>A JObject containing all DnD 5e classes</returns>
-        /// <exception cref="HttpResponseException">
-        ///    If there is a problem retreiving class data from origin server
-        /// </exception>
+        /// <returns>JSON containing all DnD 5e class names and urls</returns>
+        /// <exception cref="HttpResponseException"></exception>
         [HttpGet]
         [Route("classes")]
         public JObject GetClasses()
         {
             try
             {
-                return _dndHandler.GetClasses();
+                return _dndHandler.GetAllClasses();
             }
             catch (Exception e)
             {

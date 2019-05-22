@@ -22,7 +22,7 @@ namespace DnDBuilderLinux.Handlers
         ///     Get all races
         /// </summary>
         /// <returns>JSON object containing the official 5e races</returns>
-        public JObject GetRaces()
+        public JObject GetAllRaces()
         {
             const string key = "allRaces";
             const string url = "races";
@@ -31,27 +31,10 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Get a dnd5eapi url from JToken by name
-        /// </summary>
-        /// <param name="array">A JToken containing a list of name and url mappings</param>
-        /// <param name="name">A valid dnd5eapi name</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
-        private string GetUrlFromJToken(JToken array, string name)
-        {
-            JObject nameAndUrl = array.Children<JObject>()
-                .FirstOrDefault(r => r["name"].ToString().Equals(name, StringComparison.OrdinalIgnoreCase));
-
-            if (nameAndUrl == null) throw new ArgumentException($"{name} not found");
-
-            return nameAndUrl["url"].ToString();;
-        }
-
-        /// <summary>
         ///     Get all classes
         /// </summary>
         /// <returns>JSON object containing the official 5e classes</returns>
-        public JObject GetClasses()
+        public JObject GetAllClasses()
         {
             const string key = "allClasses";
             const string url = "classes";
@@ -109,13 +92,30 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
+        ///     Get a dnd5eapi url from a JToken by name
+        /// </summary>
+        /// <param name="array">A JToken containing a list of name and url mappings</param>
+        /// <param name="name">A valid dnd5eapi name</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        private string GetUrlFromJToken(JToken array, string name)
+        {
+            JObject nameAndUrl = array.Children<JObject>()
+                .FirstOrDefault(r => r["name"].ToString().Equals(name, StringComparison.OrdinalIgnoreCase));
+
+            if (nameAndUrl == null) throw new ArgumentException($"{name} not found");
+
+            return nameAndUrl["url"].ToString();;
+        }
+
+        /// <summary>
         ///     Get a JObject containing a classes data
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
         private JObject GetClassJson(string name)
         {
-            JObject json = GetClasses();
+            JObject json = GetAllClasses();
             string url = GetUrlFromJToken(json["results"], name);
 
             return _reqHandler.GetFromCache(name, url);

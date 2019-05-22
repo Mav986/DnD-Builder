@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
 namespace DnDBuilderLinux.Database
 {
     public static class Schema
@@ -72,12 +75,25 @@ namespace DnDBuilderLinux.Database
                 public const string Charisma = "cha";
                 public const string Intelligence = "intel";
                 public const string Wisdom = "wis";
-            }
-        }
 
-        public static class Param
-        {
-            public const string Name = "@name";
+                public static ReadOnlyCollection<string> AllFields = new ReadOnlyCollection<string>(
+                    new List<string>
+                    {
+                        Name,
+                        Age,
+                        Gender,
+                        Bio,
+                        Level,
+                        Race,
+                        Class,
+                        Constitution,
+                        Dexterity,
+                        Strength,
+                        Charisma,
+                        Intelligence,
+                        Wisdom
+                    });
+            }
         }
     }
 }

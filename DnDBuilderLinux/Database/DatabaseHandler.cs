@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using DnDBuilderLinux.Models;
 using Mono.Data.Sqlite;
 
 namespace DnDBuilderLinux.Database
 {
-    // TODO Move all query strings into their functions
     public class DatabaseHandler
     {
         public DatabaseHandler()
@@ -16,19 +16,20 @@ namespace DnDBuilderLinux.Database
             CreateCharacterTable();
         }
 
+        /// <summary>
+        ///     Insert a character into the database
+        /// </summary>
+        /// <param name="character">Character to be inserted</param>
+        /// <exception cref="DatabaseException"></exception>
         public void InsertCharacter(Character character)
         {
             try
             {
                 using (SqliteConnection dbConn = GetConnection())
                 {
-                    SqliteCommand checkDuplicates = new SqliteCommand(Schema.Character.Query.FindCharacter, dbConn);
-                    checkDuplicates.Parameters.AddWithValue(Schema.Param.Name, character.Name);
-                    int count = Convert.ToInt32(checkDuplicates.ExecuteScalar());
-                    if (count > 0) throw new DatabaseException("Character already exists");
-
+                    if (CheckExists(character.Name)) throw new DatabaseException("Character already exists");
                     SqliteCommand insert = new SqliteCommand(Schema.Character.Query.InsertCharacter, dbConn);
-                    insert = AddParameters(character, insert);
+                    insert = AddCharacterParams(character, insert);
                     insert.ExecuteNonQuery();
                 }
             }
@@ -38,29 +39,11 @@ namespace DnDBuilderLinux.Database
             }
         }
 
-        public Character SelectCharacter(string name)
-        {
-            Character selectedChar;
-            
-            try
-            {
-                using (SqliteConnection dbConn = GetConnection())
-                {
-                    SqliteCommand select = new SqliteCommand(Schema.Character.Query.SelectCharacter, dbConn);
-                    select.Parameters.AddWithValue(Schema.Param.Name, name);
-                    SqliteDataReader reader = select.ExecuteReader();
-                    if(!reader.Read()) throw new DatabaseException("Character " + name + " not found");
-                    selectedChar = ConvertToCharacter(reader);
-                }
-            }
-            catch (SqliteException e)
-            {
-                throw new DatabaseException(e.Message, e);
-            }
-
-            return selectedChar;
-        }
-
+        /// <summary>
+        ///     Select all characters from the database
+        /// </summary>
+        /// <returns>An enumerable containing all Characters</returns>
+        /// <exception cref="DatabaseException"></exception>
         public IEnumerable<Character> SelectAllCharacters()
         {
             try
@@ -84,6 +67,41 @@ namespace DnDBuilderLinux.Database
             }
         }
 
+        /// <summary>
+        ///     Select a character from the database
+        /// </summary>
+        /// <param name="name">Name of the character to select</param>
+        /// <returns>The selected Character object</returns>
+        /// <exception cref="DatabaseException"></exception>
+        public Character SelectCharacter(string name)
+        {
+            Character selectedChar;
+            
+            try
+            {
+                using (SqliteConnection dbConn = GetConnection())
+                {
+                    SqliteCommand select = new SqliteCommand(Schema.Character.Query.SelectCharacter, dbConn);
+                    select.Parameters.AddWithValue("@" + Schema.Character.Field.Name, name);
+                    SqliteDataReader reader = select.ExecuteReader();
+                    if(!reader.Read()) throw new DatabaseException("Character " + name + " not found");
+                    selectedChar = ConvertToCharacter(reader);
+                }
+            }
+            catch (SqliteException e)
+            {
+                throw new DatabaseException(e.Message, e);
+            }
+
+            return selectedChar;
+        }
+
+        /// <summary>
+        ///     Update a single character's details
+        /// </summary>
+        /// <param name="name">Name of the character to update</param>
+        /// <param name="updatedFields">A dictionary of fields to be updated and their values</param>
+        /// <exception cref="DatabaseException"></exception>
         public void UpdateCharacter(string name, Dictionary<string, string> updatedFields)
         {
             try
@@ -113,82 +131,36 @@ namespace DnDBuilderLinux.Database
         }
 
         /// <summary>
-        ///     Generate a SQL "SET" string from a dictionary of column names and values
+        ///     Delete a single character
         /// </summary>
-        /// <param name="dict">A dictionary containing a column name (key) and a value</param>
-        /// <returns>A parameter-ready string to be inserted after the SQL "SET" keyword</returns>
-        private string GenerateSqlSetString(Dictionary<string, string> dict)
+        /// <param name="name">Name of the character to be deleted</param>
+        /// <exception cref="DatabaseException"></exception>
+        public void DeleteCharacter(string name)
         {
-            string setString = "";
-            
-            foreach (KeyValuePair<string, string> entry in dict)
+            try
             {
-                string columnName = SanitizeColumn(entry.Key);
-                setString += columnName + "=@" + columnName + ", ";
+                using (SqliteConnection dbConn = GetConnection())
+                {
+                    SqliteCommand cmd = new SqliteCommand(Schema.Character.Query.DeleteCharacter, dbConn);
+                    cmd.Parameters.AddWithValue("@" + Schema.Character.Field.Name, name);
+                    cmd.ExecuteNonQuery();
+                }
             }
-
-            return setString.Substring(0, setString.Length - 2);
+            catch (SqliteException e)
+            {
+                throw new DatabaseException(e.Message, e);
+            }
         }
 
-        private string SanitizeColumn(string column)
+        /// <summary>
+        ///     Open a connection to the database
+        /// </summary>
+        private static SqliteConnection GetConnection()
         {
-            string columnName;
+            SqliteConnection connection = new SqliteConnection(Schema.Database.Connect);
+            connection.Open();
             
-            switch (column)
-            {
-                case Schema.Character.Field.Age: 
-                    columnName = Schema.Character.Field.Age;
-                    break;
-                
-                case Schema.Character.Field.Gender: 
-                    columnName = Schema.Character.Field.Gender;
-                    break;
-                
-                case Schema.Character.Field.Bio: 
-                    columnName = Schema.Character.Field.Bio;
-                    break;
-                
-                case Schema.Character.Field.Level: 
-                    columnName = Schema.Character.Field.Level;
-                    break;
-                
-                case Schema.Character.Field.Race: 
-                    columnName = Schema.Character.Field.Race;
-                    break;
-                
-                case Schema.Character.Field.Class: 
-                    columnName = Schema.Character.Field.Class;
-                    break;
-                
-                case Schema.Character.Field.Constitution: 
-                    columnName = Schema.Character.Field.Constitution;
-                    break;
-                
-                case Schema.Character.Field.Dexterity:
-                    columnName = Schema.Character.Field.Dexterity;
-                    break;
-                
-                case Schema.Character.Field.Strength: 
-                    columnName = Schema.Character.Field.Strength;
-                    break;
-                
-                case Schema.Character.Field.Charisma: 
-                    columnName = Schema.Character.Field.Charisma;
-                    break;
-                
-                case Schema.Character.Field.Intelligence: 
-                    columnName = Schema.Character.Field.Intelligence;
-                    break;
-                
-                case Schema.Character.Field.Wisdom: 
-                    columnName = Schema.Character.Field.Wisdom;
-                    break;
-                
-                default:
-                    throw new DatabaseException($"Field \"{column}\" not found");
-            }
-
-            return columnName;
+            return connection;
         }
 
         /// <summary>
@@ -196,7 +168,7 @@ namespace DnDBuilderLinux.Database
         /// </summary>
         /// <param name="reader">A database reader holding results</param>
         /// <returns>A character object</returns>
-        private Character ConvertToCharacter(IDataRecord reader)
+        private static Character ConvertToCharacter(IDataRecord reader)
         {
             return new Character
             {
@@ -216,22 +188,73 @@ namespace DnDBuilderLinux.Database
             };
         }
 
-        private SqliteCommand AddParameters(Character character, SqliteCommand command)
+        /// <summary>
+        ///     Generate a SQL "SET" string from a dictionary of column names and values
+        /// </summary>
+        /// <param name="dict">A dictionary containing a column name (key) and a value</param>
+        /// <returns>A parameter-ready string to be inserted after the SQL "SET" keyword</returns>
+        private static string GenerateSqlSetString(Dictionary<string, string> dict)
         {
-            // All key string's must match key from Schema
-            command.Parameters.AddWithValue("@name", character.Name);
-            command.Parameters.AddWithValue("@age", character.Age);
-            command.Parameters.AddWithValue("@gender", character.Gender);
-            command.Parameters.AddWithValue("@bio", character.Biography);
-            command.Parameters.AddWithValue("@level", character.Level);
-            command.Parameters.AddWithValue("@race", character.Race);
-            command.Parameters.AddWithValue("@class", character.Class);
-            command.Parameters.AddWithValue("@con", character.Con);
-            command.Parameters.AddWithValue("@dex", character.Dex);
-            command.Parameters.AddWithValue("@str", character.Str);
-            command.Parameters.AddWithValue("@cha", character.Cha);
-            command.Parameters.AddWithValue("@intel", character.Intel);
-            command.Parameters.AddWithValue("@wis", character.Wis);
+            string setString = "";
+            
+            foreach (KeyValuePair<string, string> entry in dict)
+            {
+                string columnName = SanitizeColumn(entry.Key);
+                setString += columnName + "=@" + columnName + ", ";
+            }
+
+            return setString.Substring(0, setString.Length - 2);
+        }
+
+        /// <summary>
+        ///     Sanitize a column name to prevent sql injection
+        /// </summary>
+        /// <param name="column">name of column to sanitize</param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
+        private static string SanitizeColumn(string column)
+        {
+            /*
+             * Find the first constant column name that matches the string 'column'
+             * This will prevent SQL injection by throwing an exception when the columnName
+             * contains anything other than the name of a column.
+             */
+            string newColumnName = Schema.Character.Field.AllFields.First(x => x.Equals(column, StringComparison.OrdinalIgnoreCase));
+
+            if (newColumnName == null) throw new DatabaseException("Column " + column + " not found");
+
+            return newColumnName;
+        }
+
+        /// <summary>
+        ///     Add all character fields as parameters
+        /// </summary>
+        /// <param name="character">Character to provide parameters</param>
+        /// <param name="command">Command to add parameters to</param>
+        /// <returns>A fully parameterized SqliteCommand</returns>
+        /// <exception cref="DatabaseException"></exception>
+        private static SqliteCommand AddCharacterParams(Character character, SqliteCommand command)
+        {
+            try
+            {
+                command.Parameters.AddWithValue("@" + Schema.Character.Field.Name, character.Name);
+                command.Parameters.AddWithValue("@" + Schema.Character.Field.Age, character.Age);
+                command.Parameters.AddWithValue("@" + Schema.Character.Field.Gender, character.Gender);
+                command.Parameters.AddWithValue("@" + Schema.Character.Field.Bio, character.Biography);
+                command.Parameters.AddWithValue("@" + Schema.Character.Field.Level, character.Level);
+                command.Parameters.AddWithValue("@" + Schema.Character.Field.Race, character.Race);
+                command.Parameters.AddWithValue("@" + Schema.Character.Field.Class, character.Class);
+                command.Parameters.AddWithValue("@" + Schema.Character.Field.Constitution, character.Con);
+                command.Parameters.AddWithValue("@" + Schema.Character.Field.Dexterity, character.Dex);
+                command.Parameters.AddWithValue("@" + Schema.Character.Field.Strength, character.Str);
+                command.Parameters.AddWithValue("@" + Schema.Character.Field.Charisma, character.Cha);
+                command.Parameters.AddWithValue("@" + Schema.Character.Field.Intelligence, character.Intel);
+                command.Parameters.AddWithValue("@" + Schema.Character.Field.Wisdom, character.Wis);
+            }
+            catch (SqliteException e)
+            {
+                throw new DatabaseException(e.Message, e);
+            }
 
             return command;
         }
@@ -240,7 +263,7 @@ namespace DnDBuilderLinux.Database
         ///     Create the database file on system, if one does not already exists
         /// </summary>
         /// <exception cref="DatabaseException"></exception>
-        private void CreateDatabase()
+        private static void CreateDatabase()
         {
             try
             {
@@ -259,7 +282,7 @@ namespace DnDBuilderLinux.Database
         ///     Create a table to store character data
         /// </summary>
         /// <exception cref="DatabaseException"></exception>
-        private void CreateCharacterTable()
+        private static void CreateCharacterTable()
         {
             try
             {
@@ -276,25 +299,22 @@ namespace DnDBuilderLinux.Database
         }
 
         /// <summary>
-        ///     Open the connection to the database
+        ///     Check if a character already exists in the database
         /// </summary>
-        private static SqliteConnection GetConnection()
-        {
-            SqliteConnection connection = new SqliteConnection(Schema.Database.Connect);
-            connection.Open();
-            
-            return connection;
-        }
-
-        public void DeleteCharacter(string name)
+        /// <param name="characterName">Name of character to check</param>
+        /// <returns></returns>
+        /// <exception cref="DatabaseException"></exception>
+        private static bool CheckExists(string characterName)
         {
             try
             {
                 using (SqliteConnection dbConn = GetConnection())
                 {
-                    SqliteCommand cmd = new SqliteCommand(Schema.Character.Query.DeleteCharacter, dbConn);
-                    cmd.Parameters.AddWithValue("@" + Schema.Character.Field.Name, name);
-                    cmd.ExecuteNonQuery();
+                    SqliteCommand checkDuplicates = new SqliteCommand(Schema.Character.Query.FindCharacter, dbConn);
+                    checkDuplicates.Parameters.AddWithValue("@" + Schema.Character.Field.Name, characterName);
+                    int count = Convert.ToInt32(checkDuplicates.ExecuteScalar());
+                
+                    return count > 0;
                 }
             }
             catch (SqliteException e)

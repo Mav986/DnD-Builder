@@ -22,16 +22,21 @@ namespace DnDBuilderLinux.Controllers
             _charHandler = new CharacterHandler(db);
         }
 
+        /// <summary>
+        ///     Add a Character to DnDBuilder
+        /// </summary>
+        /// <param name="character">A valid Character object</param>
+        /// <exception cref="HttpResponseException"></exception>
         [HttpPost]
         [Route("add")]
-        public void AddCharacter([FromBody] Character charData)
+        public void AddCharacter([FromBody] Character character)
         {
             try
             {
                 if (!ModelState.IsValid) throw new CharacterException("Adding character failed, invalid data");
-                _charHandler.AddCharacter(charData);
+                _charHandler.AddCharacter(character);
             }
-            catch (Exception e)
+            catch (CharacterException e)
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
@@ -40,6 +45,11 @@ namespace DnDBuilderLinux.Controllers
             }
         }
 
+        /// <summary>
+        ///     Get all characters in DnDBuilder
+        /// </summary>
+        /// <returns>A JSON array containing JSON with every character's data</returns>
+        /// <exception cref="HttpResponseException"></exception>
         [HttpGet]
         [Route("view/all")]
         public JArray GetAllCharacters()
@@ -48,7 +58,7 @@ namespace DnDBuilderLinux.Controllers
             {
                 return _charHandler.GetAllCharacters();
             }
-            catch (Exception e)
+            catch (CharacterException e)
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
@@ -56,15 +66,21 @@ namespace DnDBuilderLinux.Controllers
             }
         }
 
+        /// <summary>
+        ///     Get a single character from within DnDBuilder
+        /// </summary>
+        /// <param name="characterName">The name of the character</param>
+        /// <returns>JSON containing all the specified character's data</returns>
+        /// <exception cref="HttpResponseException"></exception>
         [HttpGet]
         [Route("view/{name}")]
-        public JObject GetCharacter(string name)
+        public JObject GetCharacter(string characterName)
         {
             try
             {
-                return _charHandler.GetCharacter(name);
+                return _charHandler.GetCharacter(characterName);
             }
-            catch (Exception e)
+            catch (CharacterException e)
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
@@ -73,15 +89,20 @@ namespace DnDBuilderLinux.Controllers
             }
         }
 
+        /// <summary>
+        ///     Update a single character within DnDBuilder
+        /// </summary>
+        /// <param name="character">JSON containing the character's name to be updated, and any updated fields</param>
+        /// <exception cref="HttpResponseException"></exception>
         [HttpPut]
         [Route("update")]
-        public void UpdateCharacter([FromBody] JObject charData)
+        public void UpdateCharacter([FromBody] JObject character)
         {
             try
             {
-                _charHandler.UpdateCharacter(charData);
+                _charHandler.UpdateCharacter(character);
             }
-            catch (Exception e)
+            catch (CharacterException e)
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
@@ -89,16 +110,21 @@ namespace DnDBuilderLinux.Controllers
                     "If the problem persists, contact a server administrator"));
             }
         }
-
+        
+        /// <summary>
+        ///     Delete a single character within DnDBuilder
+        /// </summary>
+        /// <param name="characterName">Name of the character to be deleted</param>
+        /// <exception cref="HttpResponseException"></exception>
         [HttpDelete]
         [Route("delete/{name}")]
-        public void DeleteCharacter(string name)
+        public void DeleteCharacter(string characterName)
         {
             try
             {
-                _charHandler.DeleteCharacter(name);
+                _charHandler.DeleteCharacter(characterName);
             }
-            catch (Exception e)
+            catch (CharacterException e)
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
@@ -107,23 +133,37 @@ namespace DnDBuilderLinux.Controllers
             }
         }
 
+        /// <summary>
+        ///     Download an XML file detailing a single character
+        /// </summary>
+        /// <param name="characterName">Name of the character to download xml file for</param>
+        /// <returns>An XML file containing character data</returns>
+        /// <exception cref="HttpResponseException"></exception>
         [HttpGet]
         [Route("xml/{name}")]
-        public HttpResponseMessage GenerateXmlFor(string name)
+        public HttpResponseMessage GenerateXmlFor(string characterName)
         {
+            const string filename = "character.xml";
+            
             try
             {
-                if (string.IsNullOrEmpty(name)) throw new CharacterException("Name is required");
-                _charHandler.CreateCharacterXml(name);
-                HttpResponseMessage responseMsg = Request.CreateResponse(HttpStatusCode.OK);
-                FileStream xmlFile = new FileStream("character.xml", FileMode.Open);
-                responseMsg.Content = new StreamContent(xmlFile);
+                if (string.IsNullOrEmpty(characterName)) throw new CharacterException("Name is required");
+                
+                // Generate XML file and add to response content
+                _charHandler.CreateCharacterXml(characterName, filename);
+                FileStream xmlFile = new FileStream(filename, FileMode.Open);
+                HttpResponseMessage responseMsg = new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StreamContent(xmlFile)
+                };
                 responseMsg.Content.Headers.ContentDisposition =
                     new ContentDispositionHeaderValue("attachment") {FileName = "Text.xml"};
                 responseMsg.Content.Headers.ContentType = new MediaTypeHeaderValue("application/xml");
+
                 return responseMsg;
             }
-            catch (Exception e)
+            catch (CharacterException e)
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
