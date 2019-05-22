@@ -1,4 +1,7 @@
 using System;
+using System.Globalization;
+using System.Linq;
+using DnDBuilderLinux.Models;
 using DnDBuilderLinux.Web;
 using Newtonsoft.Json.Linq;
 
@@ -29,17 +32,20 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Get a specific race by name
+        ///     Get a dnd5eapi url from JToken by name
         /// </summary>
-        /// <param name="name">A valid 5e race name</param>
-        /// <returns>JObject containing details of the requested race</returns>
+        /// <param name="array">A JToken containing a list of name and url mappings</param>
+        /// <param name="name">A valid dnd5eapi name</param>
+        /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public JObject GetRace(string name)
+        private string GetUrlFromJToken(JToken array, string name)
         {
-            var allRaces = GetRaces()["results"];
-            var json = _reqHandler.ExtractFromJArray(allRaces, name);
+            JObject nameAndUrl = array.Children<JObject>()
+                .FirstOrDefault(r => r["name"].ToString().Equals(name, StringComparison.OrdinalIgnoreCase));
 
-            return json;
+            if (nameAndUrl == null) throw new ArgumentException($"{name} not found");
+
+            return nameAndUrl["url"].ToString();;
         }
 
         /// <summary>
@@ -55,23 +61,66 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Get a specific class by name
+        ///     Determine whether this character is a caster or not
         /// </summary>
-        /// <param name="name">A valid 5e class name</param>
-        /// <returns>JObject containing details of the requested class</returns>
-        /// <exception cref="ArgumentException"></exception>
-        public JObject GetClass(string name)
+        /// <param name="character">A valid dnd Character object</param>
+        /// <returns>True if this character is a caster, false otherwise</returns>
+        public bool CalculateCaster(JObject character)
         {
-            var allClasses = GetClasses()["results"];
-            var json = _reqHandler.ExtractFromJArray(allClasses, name);
-
-            return json;
+            JObject classJson = GetClassJson(character["class"].ToString());
+            return classJson["spellcasting"] != null;
         }
 
-        public bool IsCaster(string className)
+        /// <summary>
+        ///     Determine a character's hit die
+        /// </summary>
+        /// <param name="character">A valid dnd Character object</param>
+        /// <returns>The character's hit die</returns>
+        /// <exception cref="DndException">If a character's hit die cannot be determined</exception>
+        public long CalculateHitpoints(JObject character)
         {
-            JObject classJson = GetClass(className);
-            return classJson["spellcasting"] != null;
+            JObject classData = GetClassJson(character["class"].ToString());
+            bool hitDieFound = classData.TryGetValue("hit_die", out JToken hitDieToken);
+            bool levelFound = character.TryGetValue("level", out JToken levelToken);
+            bool conFound = character.TryGetValue("con", out JToken conToken);
+
+            if (!hitDieFound || !levelFound || !conFound)
+                throw new DndException("Unable to determine hitpoints for " + character["name"]);
+            
+            long hitDie = (long) hitDieToken;
+            long level = (long) levelToken;
+            long con = (long) conToken;
+
+            return level * hitDie + con;
+
+        }
+
+        /// <summary>
+        ///     Validate a character's total ability scores.
+        ///     A character's ability scores are considered valid if they add up to a total of 20.
+        /// </summary>
+        /// <param name="character"></param>
+        /// <exception cref="DndException"></exception>
+        public void ValidateAbilityScores(Character character)
+        {
+            const int totalAbilityScore = 20;
+            long abilityScore = character.Con + character.Dex + character.Str + 
+                                character.Cha + character.Intel + character.Wis;
+            
+            if(abilityScore != totalAbilityScore) throw new DndException("Total ability score '" + abilityScore +"' invalid");
+        }
+
+        /// <summary>
+        ///     Get a JObject containing a classes data
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private JObject GetClassJson(string name)
+        {
+            JObject json = GetClasses();
+            string url = GetUrlFromJToken(json["results"], name);
+
+            return _reqHandler.GetFromCache(name, url);
         }
     }
 }

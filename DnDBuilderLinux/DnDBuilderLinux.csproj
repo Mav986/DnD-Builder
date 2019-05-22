@@ -77,6 +77,7 @@
     <Compile Include="Handlers\CharacterException.cs" />
     <Compile Include="Handlers\CharacterHandler.cs" />
     <Compile Include="Handlers\Dnd5eHandler.cs" />
+    <Compile Include="Handlers\DndException.cs" />
     <Compile Include="Models\Character.cs" />
     <Compile Include="Web\CacheHandler.cs" />
     <Compile Include="Web\RequestHandler.cs" />

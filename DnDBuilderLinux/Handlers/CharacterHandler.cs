@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using DnDBuilderLinux.Database;
 using DnDBuilderLinux.Models;
@@ -17,22 +16,19 @@ namespace DnDBuilderLinux.Handlers
             _dndHandler = new Dnd5EHandler();
         }
         
+        /// <summary>
+        ///     Add a character to DnDBuilder
+        /// </summary>
+        /// <param name="charData"></param>
         public void AddCharacter(Character charData)
         {
-            try
-            {
-                charData.Caster = _dndHandler.IsCaster(charData.Class);
-                _db.AddCharacter(charData);
-            }
-            catch (ArgumentException e)
-            {
-                throw new CharacterException(e.Message, e);
-            }
+            _dndHandler.ValidateAbilityScores(charData);
+            _db.InsertCharacter(charData);
         }
 
         public JArray GetAllCharacters()
         {
-            List<Character> charList = _db.SelectAll();
+            IEnumerable<Character> charList = _db.SelectAllCharacters();
             JArray jsonList = new JArray();
 
             foreach (Character c in charList)
@@ -51,23 +47,37 @@ namespace DnDBuilderLinux.Handlers
             return jsonList;
         }
 
-        public void UpdateCharacter(JObject newData)
+        public JObject GetCharacter(string name)
         {
-            try
+            Character selectedChar = _db.SelectCharacter(name);
+            JObject json = JObject.FromObject(selectedChar);
+
+            return AddCalculatedAttributes(json);
+        }
+
+        public void UpdateCharacter(JObject charData)
+        {
+            Dictionary<string, string> characterDict = new Dictionary<string, string>();
+            
+            string name = (string) charData[Schema.Character.Field.Name];
+            charData.Remove(Schema.Character.Field.Name);
+            
+            foreach (JProperty property in charData.Properties())
             {
-                string name = (string) newData[Schema.Character.Field.Name];
-                newData.Remove(Schema.Character.Field.Name);
-                foreach (JProperty property in newData.Properties())
-                {
-                    string key = property.Name;
-                    string value = property.Value.ToString();
-                    _db.UpdateCharacter(name, key, value);
-                }
-            }   
-            catch (DatabaseException e)
-            {
-                throw new CharacterException(e.Message, e);
+                string key = property.Name;
+                string value = property.Value.ToString();
+                
+                characterDict.Add(key, value);
             }
+            _db.UpdateCharacter(name, characterDict);
+        }
+
+        private JObject AddCalculatedAttributes(JObject json)
+        {
+            json["hitpoints"] = _dndHandler.CalculateHitpoints(json);
+            json["caster"] = _dndHandler.CalculateCaster(json);
+
+            return json;
         }
     }
 }

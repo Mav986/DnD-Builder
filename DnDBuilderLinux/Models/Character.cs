@@ -1,5 +1,5 @@
-using System;
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
 
 namespace DnDBuilderLinux.Models
 {
@@ -21,6 +21,7 @@ namespace DnDBuilderLinux.Models
         private long _wis;
 
         [Required]
+        [JsonProperty("name")]
         public string Name
         {
             get => _name;
@@ -29,6 +30,7 @@ namespace DnDBuilderLinux.Models
 
         [Required]
         [Range(0, 500, ErrorMessage = "{0} must be between {1} and {2}")]
+        [JsonProperty("age")]
         public long Age
         {
             get => _age;
@@ -36,6 +38,7 @@ namespace DnDBuilderLinux.Models
         }
 
         [Required]
+        [JsonProperty("gender")]
         public string Gender
         {
             get => string.IsNullOrWhiteSpace(_gender) ? "" : _gender; 
@@ -43,6 +46,7 @@ namespace DnDBuilderLinux.Models
         }
 
         [MaxLength(500, ErrorMessage = "Biography must not exceed 500 characters")]
+        [JsonProperty("bio")]
         public string Biography
         {
             get => string.IsNullOrWhiteSpace(_biography) ? "" : _biography;
@@ -51,6 +55,7 @@ namespace DnDBuilderLinux.Models
 
         [Required]
         [Range(1, 20, ErrorMessage = "Level must be between 1 and 20")]
+        [JsonProperty("level")]
         public long Level
         {
             get => _level;
@@ -58,6 +63,7 @@ namespace DnDBuilderLinux.Models
         }
 
         [Required]
+        [JsonProperty("race")]
         public string Race
         {
             get => _race;
@@ -65,6 +71,7 @@ namespace DnDBuilderLinux.Models
         }
 
         [Required]
+        [JsonProperty("class")]
         public string Class
         {
             get => _class;
@@ -72,6 +79,7 @@ namespace DnDBuilderLinux.Models
         }
 
         [Required]
+        [JsonProperty("con")]
         public long Con
         {
             get => _con;
@@ -79,6 +87,7 @@ namespace DnDBuilderLinux.Models
         }
 
         [Required]
+        [JsonProperty("dex")]
         public long Dex
         {
             get => _dex;
@@ -86,6 +95,7 @@ namespace DnDBuilderLinux.Models
         }
 
         [Required]
+        [JsonProperty("str")]
         public long Str
         {
             get => _str;
@@ -93,6 +103,7 @@ namespace DnDBuilderLinux.Models
         }
 
         [Required]
+        [JsonProperty("cha")]
         public long Cha
         {
             get => _cha;
@@ -100,6 +111,7 @@ namespace DnDBuilderLinux.Models
         }
 
         [Required]
+        [JsonProperty("intel")]
         public long Intel
         {
             get => _intel;
@@ -107,6 +119,7 @@ namespace DnDBuilderLinux.Models
         }
 
         [Required]
+        [JsonProperty("wis")]
         public long Wis
         {
             get => _wis;

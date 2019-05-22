@@ -61,10 +61,7 @@ namespace DnDBuilderLinux.Web
 
             if (json == null) throw new ArgumentException($"{name} not found");
 
-            string key = json["name"].ToString();
-            string url = json["url"].ToString();
-
-            return GetFromCache(key, url);
+            return json;
         }
 
         /// <summary>

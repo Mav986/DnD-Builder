@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
@@ -26,28 +27,45 @@ namespace DnDBuilderLinux.Controllers
         {
             try
             {
-                if (!ModelState.IsValid) throw new CharacterException("Character invalid");
+                if (!ModelState.IsValid) throw new CharacterException("Adding character failed, invalid data");
                 _charHandler.AddCharacter(charData);
             }
-            catch (CharacterException)
+            catch (Exception e)
             {
-                // Best practice: log stack trace here
+                Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
-                    "Something went wrong. Please check your data and try again."));
+                    "Something went wrong. Please check your data and try again. " +
+                    "If the problem persists, contact a server administrator"));
             }
         }
 
         [HttpGet]
         [Route("view/all")]
-        public JArray GetCharacters()
+        public JArray GetAllCharacters()
         {
             try
             {
                 return _charHandler.GetAllCharacters();
             }
-            catch (CharacterException)
+            catch (Exception e)
             {
-                // Best practice: log stack trace here
+                Console.WriteLine(e);
+                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
+                    "Something went wrong. Please contact a server administrator."));
+            }
+        }
+
+        [HttpGet]
+        [Route("view/{name}")]
+        public JObject GetCharacter(string name)
+        {
+            try
+            {
+                return _charHandler.GetCharacter(name);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
                     "Something went wrong. Please contact a server administrator."));
             }
@@ -55,17 +73,18 @@ namespace DnDBuilderLinux.Controllers
 
         [HttpPut]
         [Route("update")]
-        public void UpdateCharacter([FromBody] JObject newData)
+        public void UpdateCharacter([FromBody] JObject charData)
         {
             try
             {
-                _charHandler.UpdateCharacter(newData);
+                _charHandler.UpdateCharacter(charData);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // Best practice: log stack trace here
+                Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
-                    "Something went wrong. Please check your data and try again."));
+                    "Something went wrong. Please check your data and try again. " +
+                    "If the problem persists, contact a server administrator"));
             }
         }
     }
