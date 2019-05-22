@@ -29,7 +29,7 @@ namespace DnDBuilderLinux.Controllers
         ///     Thrown anytime there is a problem retrieving race data from origin server
         /// </exception>
         [HttpGet]
-        [Route("races/all")]
+        [Route("races")]
         public JObject GetRaces()
         {
             try
@@ -38,31 +38,10 @@ namespace DnDBuilderLinux.Controllers
             }
             catch (Exception e)
             {
+                Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
-                    "Error: " + e.Message));
-            }
-        }
-
-        /// <summary>
-        ///     GET a specific race
-        /// </summary>
-        /// <param name="name">The name of the race</param>
-        /// <returns>A JObject containing data for the specified race</returns>
-        /// <exception cref="HttpResponseException">
-        ///     Thrown if the named race cannot be found
-        /// </exception>
-        [HttpGet]
-        [Route("races/{name}")]
-        public JObject GetRace(string name)
-        {
-            try
-            {
-                return _dndHandler.GetRace(name);
-            }
-            catch (ArgumentException e)
-            {
-                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound,
-                    "Error: " + e.Message));
+                    "Something went wrong. Please check your data and try again. " +
+                    "If the problem persists, contact a server administrator"));
             }
         }
 
@@ -70,7 +49,7 @@ namespace DnDBuilderLinux.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("classes/all")]
+        [Route("classes")]
         public JObject GetClasses()
         {
             try
@@ -80,21 +59,6 @@ namespace DnDBuilderLinux.Controllers
             catch (Exception e)
             {
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
-                    "Error: " + e.Message));
-            }
-        }
-
-        [HttpGet]
-        [Route("classes/{name}")]
-        public JObject GetClass(string name)
-        {
-            try
-            {
-                return _dndHandler.GetClass(name);
-            }
-            catch (ArgumentException e)
-            {
-                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound,
                     "Error: " + e.Message));
             }
         }
