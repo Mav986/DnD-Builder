@@ -12,7 +12,6 @@ namespace DnDBuilderLinux.Models
         private long _level;
         private string _race;
         private string _class;
-        private long _hp;
 
         private long _con;
         private long _dex;
@@ -21,114 +20,97 @@ namespace DnDBuilderLinux.Models
         private long _intel;
         private long _wis;
 
-        [Required(ErrorMessage = "Character name is required")]
+        [Required]
         public string Name
         {
             get => _name;
-            set => _name = value;
+            set => _name = string.IsNullOrWhiteSpace(value) ? "" : value;
         }
 
+        [Required]
+        [Range(0, 500, ErrorMessage = "{0} must be between {1} and {2}")]
         public long Age
         {
             get => _age;
-            set
-            {
-                if (value >= 0 && value <= 500) _age = value;
-                else throw new ArgumentException("Age must be between 0 and 500");
-            }
+            set => _age = value;
         }
 
+        [Required]
         public string Gender
         {
-            get => _gender; 
+            get => string.IsNullOrWhiteSpace(_gender) ? "" : _gender; 
             set => _gender = value;
         }
 
+        [MaxLength(500, ErrorMessage = "Biography must not exceed 500 characters")]
         public string Biography
         {
-            get => _biography;
-            set
-            {
-                if (value.Length <= 500) _biography = value;
-                else throw new ArgumentException("Biography must not be more than 500 characters");
-            }
+            get => string.IsNullOrWhiteSpace(_biography) ? "" : _biography;
+            set => _biography = value;
         }
 
+        [Required]
+        [Range(1, 20, ErrorMessage = "Level must be between 1 and 20")]
         public long Level
         {
             get => _level;
-            set
-            {
-                if (value >= 1 && value <= 20) _level = value;
-                else throw new ArgumentException("Level must be between 1 and 20");
-            }
+            set => _level = value;
         }
 
+        [Required]
         public string Race
         {
             get => _race;
-            set => _race = value; // Race will be a preset string from a dropdown box
+            set => _race = string.IsNullOrWhiteSpace(value) ? "" : value; // Race will be a preset string from a dropdown box
         }
 
+        [Required]
         public string Class
         {
             get => _class;
-            set => _class = value; // Class will be a preset string from a dropdown box
+            set => _class = string.IsNullOrWhiteSpace(value) ? "" : value; // Class will be a preset string from a dropdown box
         }
 
-        public bool Caster
-        {
-            get;
-            set;
-        }
-
-        public long Hitpoints
-        {
-            get => _hp;
-            set => _hp = value;
-        }
-
+        [Required]
         public long Con
         {
             get => _con;
             set => _con = value;
         }
 
+        [Required]
         public long Dex
         {
             get => _dex;
             set => _dex = value;
         }
 
+        [Required]
         public long Str
         {
             get => _str;
             set => _str = value;
         }
 
+        [Required]
         public long Cha
         {
             get => _cha;
             set => _cha = value;
         }
 
+        [Required]
         public long Intel
         {
             get => _intel;
             set => _intel = value;
         }
 
+        [Required]
         public long Wis
         {
             get => _wis;
             set => _wis = value;
-        }
-
-        public override string ToString()
-        {
-            return Name + "\n" + Age + "\n" + Gender + "\n"  + Biography + "\n" + Level +
-                   "\n" + Race + "\n" + Class + "\n" + Caster + "\n" + Hitpoints + "\n" +
-                   + Con + "\n" + Dex + "\n" + Str + "\n" + Cha + "\n" + Intel + "\n" + Wis;
         }
     }
 }
