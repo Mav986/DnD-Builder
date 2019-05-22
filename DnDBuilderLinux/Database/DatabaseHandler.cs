@@ -285,5 +285,22 @@ namespace DnDBuilderLinux.Database
             
             return connection;
         }
+
+        public void DeleteCharacter(string name)
+        {
+            try
+            {
+                using (SqliteConnection dbConn = GetConnection())
+                {
+                    SqliteCommand cmd = new SqliteCommand(Schema.Character.Query.DeleteCharacter, dbConn);
+                    cmd.Parameters.AddWithValue("@" + Schema.Character.Field.Name, name);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (SqliteException e)
+            {
+                throw new DatabaseException(e.Message, e);
+            }
+        }
     }
 }

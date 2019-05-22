@@ -79,5 +79,10 @@ namespace DnDBuilderLinux.Handlers
 
             return json;
         }
+
+        public void DeleteCharacter(string name)
+        {
+            _db.DeleteCharacter(name);
+        }
     }
 }

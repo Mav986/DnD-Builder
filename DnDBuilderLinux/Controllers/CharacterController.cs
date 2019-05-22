@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
@@ -34,7 +33,7 @@ namespace DnDBuilderLinux.Controllers
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
-                    "Something went wrong. Please check your data and try again. " +
+                    "Unable to create character. Please check your data and try again. " +
                     "If the problem persists, contact a server administrator"));
             }
         }
@@ -51,7 +50,7 @@ namespace DnDBuilderLinux.Controllers
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
-                    "Something went wrong. Please contact a server administrator."));
+                    "Unable to get characters. Please contact a server administrator."));
             }
         }
 
@@ -66,8 +65,9 @@ namespace DnDBuilderLinux.Controllers
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
-                    "Something went wrong. Please contact a server administrator."));
+                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
+                    "Unable to get character. Please check your data and try again. " +
+                    "If the problem persists, contact a server administrator"));
             }
         }
 
@@ -83,7 +83,24 @@ namespace DnDBuilderLinux.Controllers
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
-                    "Something went wrong. Please check your data and try again. " +
+                    "Unable to update character. Please check your data and try again. " +
+                    "If the problem persists, contact a server administrator"));
+            }
+        }
+
+        [HttpDelete]
+        [Route("delete/{name}")]
+        public void DeleteCharacter(string name)
+        {
+            try
+            {
+                _charHandler.DeleteCharacter(name);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
+                    "Unable to delete character. Please check the name and try again. " +
                     "If the problem persists, contact a server administrator"));
             }
         }

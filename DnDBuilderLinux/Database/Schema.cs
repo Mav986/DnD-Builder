@@ -53,6 +53,8 @@ namespace DnDBuilderLinux.Database
                                                       " WHERE " + Field.Name + "=@name";
 
                 public const string SelectAll = "SELECT * FROM " + Table;
+
+                public const string DeleteCharacter = "DELETE FROM " + Table + " WHERE " + Field.Name + "=@name";
             }
 
             public static class Field
