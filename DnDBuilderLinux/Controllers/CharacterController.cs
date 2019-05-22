@@ -1,6 +1,8 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Web.Http;
 using DnDBuilderLinux.Database;
 using DnDBuilderLinux.Handlers;
@@ -101,6 +103,31 @@ namespace DnDBuilderLinux.Controllers
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
                     "Unable to delete character. Please check the name and try again. " +
+                    "If the problem persists, contact a server administrator"));
+            }
+        }
+
+        [HttpGet]
+        [Route("xml/{name}")]
+        public HttpResponseMessage GenerateXmlFor(string name)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(name)) throw new CharacterException("Name is required");
+                _charHandler.CreateCharacterXml(name);
+                HttpResponseMessage responseMsg = Request.CreateResponse(HttpStatusCode.OK);
+                FileStream xmlFile = new FileStream("character.xml", FileMode.Open);
+                responseMsg.Content = new StreamContent(xmlFile);
+                responseMsg.Content.Headers.ContentDisposition =
+                    new ContentDispositionHeaderValue("attachment") {FileName = "Text.xml"};
+                responseMsg.Content.Headers.ContentType = new MediaTypeHeaderValue("application/xml");
+                return responseMsg;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
+                    "Unable to generate XML. Please check the name and try again. " +
                     "If the problem persists, contact a server administrator"));
             }
         }

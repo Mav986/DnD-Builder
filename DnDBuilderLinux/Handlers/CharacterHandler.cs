@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.IO;
+using System.Xml.Serialization;
 using DnDBuilderLinux.Database;
 using DnDBuilderLinux.Models;
 using Newtonsoft.Json.Linq;
@@ -83,6 +85,17 @@ namespace DnDBuilderLinux.Handlers
         public void DeleteCharacter(string name)
         {
             _db.DeleteCharacter(name);
+        }
+
+        public void CreateCharacterXml(string name)
+        {
+            JObject charJson = GetCharacter(name);
+            Character character = charJson.ToObject<Character>();
+            XmlSerializer writer = new XmlSerializer(typeof(Character));
+            FileStream file = File.Create("character.xml");
+
+            writer.Serialize(file, character);
+            file.Close();
         }
     }
 }
