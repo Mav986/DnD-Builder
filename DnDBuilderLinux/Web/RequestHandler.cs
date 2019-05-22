@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using System.Web;
 using Newtonsoft.Json.Linq;
 
 namespace DnDBuilderLinux.Web
@@ -53,8 +54,9 @@ namespace DnDBuilderLinux.Web
         /// <returns>A JObject of the response body JSON</returns>
         private JObject GetJson(string url)
         {
+            
             string endpoint = ExtractEndpoint(url);
-            HttpResponseMessage res = _client.GetAsync(endpoint).Result;
+            HttpResponseMessage res = _client.GetAsync(HttpUtility.UrlPathEncode(endpoint)).Result;
             res.EnsureSuccessStatusCode();
             JObject json = res.Content.ReadAsAsync<JObject>().Result;
 

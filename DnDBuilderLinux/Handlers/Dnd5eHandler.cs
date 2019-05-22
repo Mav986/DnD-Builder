@@ -91,7 +91,6 @@ namespace DnDBuilderLinux.Handlers
             long con = (long) conToken;
 
             return level * hitDie + con;
-
         }
 
         /// <summary>
