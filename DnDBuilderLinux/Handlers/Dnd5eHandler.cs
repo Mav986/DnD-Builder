@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using DnDBuilderLinux.Models;
 using DnDBuilderLinux.Web;
 using Newtonsoft.Json.Linq;
@@ -22,12 +24,20 @@ namespace DnDBuilderLinux.Handlers
         ///     Get all races
         /// </summary>
         /// <returns>JSON object containing the official 5e races</returns>
-        public JObject GetAllRaces()
+        public List<string> GetAllRaces()
         {
-            const string key = "allRaces";
-            const string url = "races";
+            try
+            {
+                const string key = "allRaces";
+                const string url = "races";
+                List<string> nameList = CreateListFromJson(_reqHandler.GetFromCache(key, url));
 
-            return _reqHandler.GetFromCache(key, url);
+                return nameList;
+            }
+            catch (HttpRequestException e)
+            {
+                throw new DndException(e.Message, e);
+            }
         }
 
         /// <summary>
@@ -36,10 +46,17 @@ namespace DnDBuilderLinux.Handlers
         /// <returns>JSON object containing the official 5e classes</returns>
         public JObject GetAllClasses()
         {
-            const string key = "allClasses";
-            const string url = "classes";
+            try
+            {
+                const string key = "allClasses";
+                const string url = "classes";
 
-            return _reqHandler.GetFromCache(key, url);
+                return _reqHandler.GetFromCache(key, url);
+            }
+            catch (HttpRequestException e)
+            {
+                throw new DndException(e.Message, e);
+            }
         }
 
         /// <summary>
@@ -61,19 +78,26 @@ namespace DnDBuilderLinux.Handlers
         /// <exception cref="DndException">If a character's hit die cannot be determined</exception>
         public long CalculateHitpoints(JObject character)
         {
-            JObject classData = GetClassJson(character["class"].ToString());
-            bool hitDieFound = classData.TryGetValue("hit_die", out JToken hitDieToken);
-            bool levelFound = character.TryGetValue("level", out JToken levelToken);
-            bool conFound = character.TryGetValue("con", out JToken conToken);
+            try
+            {
+                JObject classData = GetClassJson(character["class"].ToString());
+                bool hitDieFound = classData.TryGetValue("hit_die", out JToken hitDieToken);
+                bool levelFound = character.TryGetValue("level", out JToken levelToken);
+                bool conFound = character.TryGetValue("con", out JToken conToken);
 
-            if (!hitDieFound || !levelFound || !conFound)
+                if (!hitDieFound || !levelFound || !conFound)
+                    throw new DndException("Unable to determine hitpoints for " + character["name"]);
+
+                long hitDie = (long) hitDieToken;
+                long level = (long) levelToken;
+                long con = (long) conToken;
+
+                return level * hitDie + con;
+            }
+            catch (InvalidCastException ic)
+            {
                 throw new DndException("Unable to determine hitpoints for " + character["name"]);
-            
-            long hitDie = (long) hitDieToken;
-            long level = (long) levelToken;
-            long con = (long) conToken;
-
-            return level * hitDie + con;
+            }
         }
 
         /// <summary>
@@ -119,6 +143,18 @@ namespace DnDBuilderLinux.Handlers
             string url = GetUrlFromJToken(json["results"], name);
 
             return _reqHandler.GetFromCache(name, url);
+        }
+
+        private List<string> CreateListFromJson(JObject json)
+        {
+            List<string> names = new List<string>();
+            
+            foreach (KeyValuePair<string, JToken> entry in json)
+            {
+                names.Add(entry.Value["name"].ToString());
+            }
+
+            return names;
         }
     }
 }

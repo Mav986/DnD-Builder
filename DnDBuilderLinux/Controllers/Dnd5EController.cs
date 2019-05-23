@@ -32,7 +32,8 @@ namespace DnDBuilderLinux.Controllers
         {
             try
             {
-                return _dndHandler.GetAllRaces();
+                JObject json = JObject.FromObject(_dndHandler.GetAllRaces());
+                return json;
             }
             catch (Exception e)
             {

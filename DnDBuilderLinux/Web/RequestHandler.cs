@@ -54,13 +54,19 @@ namespace DnDBuilderLinux.Web
         /// <returns>A JObject of the response body JSON</returns>
         private JObject GetJson(string url)
         {
-            
-            string endpoint = ExtractEndpoint(url);
-            HttpResponseMessage res = _client.GetAsync(HttpUtility.UrlPathEncode(endpoint)).Result;
-            res.EnsureSuccessStatusCode();
-            JObject json = res.Content.ReadAsAsync<JObject>().Result;
+            try
+            {
+                string endpoint = ExtractEndpoint(url);
+                HttpResponseMessage res = _client.GetAsync(HttpUtility.UrlPathEncode(endpoint)).Result;
+                res.EnsureSuccessStatusCode();
+                JObject json = res.Content.ReadAsAsync<JObject>().Result;
 
-            return json;
+                return json;
+            }
+            catch (ArgumentNullException e)
+            {
+                throw new HttpRequestException("Something went wrong while processing the request", e);
+            }
         }
 
         /// <summary>
@@ -71,7 +77,9 @@ namespace DnDBuilderLinux.Web
         private string ExtractEndpoint(string url)
         {
             string baseUrl = _client.BaseAddress.ToString();
-            if (!url.StartsWith(baseUrl)) return url;
+            if (!url.StartsWith(baseUrl)) 
+                return url;
+            
             string[] result = url.Split(new[] {baseUrl}, StringSplitOptions.None);
 
             return string.Join("", result);
