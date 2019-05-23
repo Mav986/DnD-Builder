@@ -24,16 +24,15 @@ namespace DnDBuilderLinux.Controllers
         /// <summary>
         ///     Get the names and DnD5eapi urls for all races
         /// </summary>
-        /// <returns>JSON containing all DnD 5e race names and urls</returns>
+        /// <returns>JSON containing all DnD 5e race names</returns>
         /// <exception cref="HttpResponseException"></exception>
         [HttpGet]
         [Route("races")]
-        public JObject GetRaces()
+        public JToken GetRaces()
         {
             try
             {
-                JObject json = JObject.FromObject(_dndHandler.GetAllRaces());
-                return json;
+                return _dndHandler.GetAllRaces();
             }
             catch (Exception e)
             {
@@ -50,7 +49,7 @@ namespace DnDBuilderLinux.Controllers
         /// <exception cref="HttpResponseException"></exception>
         [HttpGet]
         [Route("classes")]
-        public JObject GetClasses()
+        public JToken GetClasses()
         {
             try
             {

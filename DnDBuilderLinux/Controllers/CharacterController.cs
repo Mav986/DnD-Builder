@@ -73,7 +73,7 @@ namespace DnDBuilderLinux.Controllers
         /// <returns>JSON containing all the specified character's data</returns>
         /// <exception cref="HttpResponseException"></exception>
         [HttpGet]
-        [Route("view/{name}")]
+        [Route("view/{characterName}")]
         public JObject GetCharacter(string characterName)
         {
             try
@@ -117,7 +117,7 @@ namespace DnDBuilderLinux.Controllers
         /// <param name="characterName">Name of the character to be deleted</param>
         /// <exception cref="HttpResponseException"></exception>
         [HttpDelete]
-        [Route("delete/{name}")]
+        [Route("delete/{characterName}")]
         public void DeleteCharacter(string characterName)
         {
             try
@@ -140,7 +140,7 @@ namespace DnDBuilderLinux.Controllers
         /// <returns>An XML file containing character data</returns>
         /// <exception cref="HttpResponseException"></exception>
         [HttpGet]
-        [Route("xml/{name}")]
+        [Route("xml/{characterName}")]
         public HttpResponseMessage GenerateXmlFor(string characterName)
         {
             const string filename = "character.xml";
