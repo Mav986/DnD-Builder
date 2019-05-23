@@ -40,7 +40,7 @@ namespace DnDBuilderLinux.Controllers
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
-                    "Unable to create character. Please check your data and try again. " +
+                    e.Message + " Please check your data and try again. " +
                     "If the problem persists, contact a server administrator"));
             }
         }
@@ -62,7 +62,7 @@ namespace DnDBuilderLinux.Controllers
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
-                    "Unable to get characters. Please contact a server administrator."));
+                    e.Message + " Please contact a server administrator."));
             }
         }
 
@@ -84,7 +84,7 @@ namespace DnDBuilderLinux.Controllers
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
-                    "Unable to get character. Please check your data and try again. " +
+                    e.Message + " Please check your data and try again. " +
                     "If the problem persists, contact a server administrator"));
             }
         }
@@ -106,7 +106,7 @@ namespace DnDBuilderLinux.Controllers
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
-                    "Unable to update character. Please check your data and try again. " +
+                    e.Message + " Please check your data and try again. " +
                     "If the problem persists, contact a server administrator"));
             }
         }
@@ -128,7 +128,7 @@ namespace DnDBuilderLinux.Controllers
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
-                    "Unable to delete character. Please check the name and try again. " +
+                    e.Message + " Please check your data and try again. " +
                     "If the problem persists, contact a server administrator"));
             }
         }
@@ -167,7 +167,7 @@ namespace DnDBuilderLinux.Controllers
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
-                    "Unable to generate XML. Please check the name and try again. " +
+                    e.Message + " Please check your data and try again. " +
                     "If the problem persists, contact a server administrator"));
             }
         }

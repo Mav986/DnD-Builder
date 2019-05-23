@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -34,7 +35,11 @@ namespace DnDBuilderLinux.Handlers
             }
             catch (DatabaseException e)
             {
-                throw new CharacterException(e.Message, e);
+                throw new CharacterException("Error adding character to DnDBuilder.", e);
+            }
+            catch (DndException e)
+            {
+                throw new CharacterException("Ability scores invalid: Ability scores must combine to equal 20.", e);
             }
         }
 
@@ -66,7 +71,7 @@ namespace DnDBuilderLinux.Handlers
             }
             catch (DatabaseException e)
             {
-                throw new CharacterException(e.Message, e);
+                throw new CharacterException("Error retreiving characters from DnDBuilder.", e);
             }
         }
 
@@ -87,7 +92,7 @@ namespace DnDBuilderLinux.Handlers
             }
             catch (DatabaseException e)
             {
-                throw new CharacterException(e.Message, e);
+                throw new CharacterException("Error retreiving character from DnDBuilder.", e);
             }
         }
 
@@ -102,13 +107,13 @@ namespace DnDBuilderLinux.Handlers
             {
                 string name = (string) json[Schema.Character.Field.Name];
                 json.Remove(Schema.Character.Field.Name);
-                
+
                 Dictionary<string, string> propertyDict = GeneratePropertyDict(json);
                 _db.UpdateCharacter(name, propertyDict);
             }
             catch (DatabaseException e)
             {
-                throw new CharacterException(e.Message, e);
+                throw new CharacterException("Error updating character in DnDBuilder.", e);
             }
         }
 
@@ -125,7 +130,7 @@ namespace DnDBuilderLinux.Handlers
             }
             catch (DatabaseException e)
             {
-                throw new CharacterException(e.Message, e);
+                throw new CharacterException("Error deleting character from DnDBuilder.", e);
             }
         }
 
@@ -136,13 +141,20 @@ namespace DnDBuilderLinux.Handlers
         /// <param name="filename">Name of the file to generate</param>
         public void CreateCharacterXml(string name, string filename)
         {
-            JObject charJson = GetCharacter(name);
-            Character character = charJson.ToObject<Character>();
-            XmlSerializer writer = new XmlSerializer(typeof(Character));
-            FileStream file = File.Create(filename);
+            try
+            {
+                JObject charJson = GetCharacter(name);
+                Character character = charJson.ToObject<Character>();
+                XmlSerializer writer = new XmlSerializer(typeof(Character));
+                FileStream file = File.Create(filename);
 
-            writer.Serialize(file, character);
-            file.Close();
+                writer.Serialize(file, character);
+                file.Close();
+            }
+            catch (IOException e)
+            {
+                throw new CharacterException("Error generating xml for character.", e);
+            }
         }
 
         /// <summary>
@@ -171,12 +183,12 @@ namespace DnDBuilderLinux.Handlers
             foreach (JProperty property in json.Properties())
             {
                 string key = property.Name;
-                string value = property.Value.ToString();
+                string value = property.Value == null ? "" : property.Value.ToString();
                 
                 characterDict.Add(key, value);
             }
 
-            if (characterDict.Count < 1) throw new CharacterException("No fields updated");
+            if (characterDict.Count < 1) throw new CharacterException("No fields to update.");
 
             return characterDict;
         }
