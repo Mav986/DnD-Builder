@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Web;
 using DnDBuilderLinux.Models;
 using Mono.Data.Sqlite;
 
@@ -44,7 +45,7 @@ namespace DnDBuilderLinux.Database
         /// </summary>
         /// <returns>An enumerable containing all Characters</returns>
         /// <exception cref="DatabaseException"></exception>
-        public IEnumerable<Character> SelectAllCharacters()
+        public List<Character> SelectAllCharacters(Func<IDataRecord, Character> sanitizeCallback)
         {
             try
             {
@@ -55,7 +56,7 @@ namespace DnDBuilderLinux.Database
                     SqliteDataReader reader = cmd.ExecuteReader();
                     while (reader.Read())
                     {
-                        charList.Add(ConvertToCharacter(reader));
+                        charList.Add(sanitizeCallback(reader));
                     }
                 }
 
@@ -73,9 +74,8 @@ namespace DnDBuilderLinux.Database
         /// <param name="name">Name of the character to select</param>
         /// <returns>The selected Character object</returns>
         /// <exception cref="DatabaseException"></exception>
-        public Character SelectCharacter(string name)
+        public Character SelectCharacter(string name, Func<IDataRecord, Character> sanitizeCharacter)
         {
-            Character selectedChar;
             
             try
             {
@@ -85,15 +85,13 @@ namespace DnDBuilderLinux.Database
                     select.Parameters.AddWithValue("@" + Schema.Character.Field.Name, name);
                     SqliteDataReader reader = select.ExecuteReader();
                     if(!reader.Read()) throw new DatabaseException("Character " + name + " not found");
-                    selectedChar = ConvertToCharacter(reader);
+                    return sanitizeCharacter(reader);
                 }
             }
             catch (SqliteException e)
             {
                 throw new DatabaseException(e.Message, e);
             }
-
-            return selectedChar;
         }
 
         /// <summary>
@@ -161,31 +159,6 @@ namespace DnDBuilderLinux.Database
             connection.Open();
             
             return connection;
-        }
-
-        /// <summary>
-        ///     Convert database reader results into a character object
-        /// </summary>
-        /// <param name="reader">A database reader holding results</param>
-        /// <returns>A character object</returns>
-        private static Character ConvertToCharacter(IDataRecord reader)
-        {
-            return new Character
-            {
-                Name = reader[Schema.Character.Field.Name] as string,
-                Age = reader[Schema.Character.Field.Age] as long? ?? 0,
-                Gender = reader[Schema.Character.Field.Gender] as string,
-                Biography = reader[Schema.Character.Field.Bio] as string,
-                Level = reader[Schema.Character.Field.Level] as long? ?? 0,
-                Race = reader[Schema.Character.Field.Race] as string,
-                Class = reader[Schema.Character.Field.Class] as string,
-                Con = reader[Schema.Character.Field.Constitution] as long? ?? 0,
-                Dex = reader[Schema.Character.Field.Dexterity] as long? ?? 0,
-                Str = reader[Schema.Character.Field.Strength] as long? ?? 0,
-                Cha = reader[Schema.Character.Field.Charisma] as long? ?? 0,
-                Intel = reader[Schema.Character.Field.Intelligence] as long? ?? 0,
-                Wis = reader[Schema.Character.Field.Wisdom] as long? ?? 0
-            };
         }
 
         /// <summary>

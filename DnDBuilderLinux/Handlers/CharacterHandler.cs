@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
+using System.Web;
 using System.Xml.Serialization;
 using DnDBuilderLinux.Database;
 using DnDBuilderLinux.Models;
@@ -45,17 +47,16 @@ namespace DnDBuilderLinux.Handlers
         {
             try
             {
-                IEnumerable<Character> charList = _db.SelectAllCharacters();
                 JArray jsonList = new JArray();
 
-                foreach (Character c in charList)
+                foreach (Character character in _db.SelectAllCharacters(SanitizeCharacter))
                 {
                     JObject charDetails = new JObject
                     {
-                        [Schema.Character.Field.Name] = c.Name,
-                        [Schema.Character.Field.Race] = c.Race,
-                        [Schema.Character.Field.Class] = c.Class,
-                        [Schema.Character.Field.Level] = c.Level
+                        [Schema.Character.Field.Name] = character.Name,
+                        [Schema.Character.Field.Race] = character.Race,
+                        [Schema.Character.Field.Class] = character.Class,
+                        [Schema.Character.Field.Level] = character.Level
                     };
 
                     jsonList.Add(charDetails);
@@ -79,7 +80,7 @@ namespace DnDBuilderLinux.Handlers
         {
             try
             {
-                Character selectedChar = _db.SelectCharacter(name);
+                Character selectedChar = _db.SelectCharacter(name, SanitizeCharacter);
                 JObject json = JObject.FromObject(selectedChar);
 
                 return AddCalculatedAttributes(json);
@@ -178,6 +179,37 @@ namespace DnDBuilderLinux.Handlers
             if (characterDict.Count < 1) throw new CharacterException("No fields updated");
 
             return characterDict;
+        }
+
+        /// <summary>
+        ///     Convert database reader results into a character object
+        /// </summary>
+        /// <param name="reader">A database reader holding results</param>
+        /// <returns>A character object</returns>
+        private static Character SanitizeCharacter(IDataRecord reader)
+        {
+            string name = reader[Schema.Character.Field.Name] as string;
+            string gender = reader[Schema.Character.Field.Gender] as string;
+            string bio = reader[Schema.Character.Field.Bio] as string;
+            string race = reader[Schema.Character.Field.Race] as string;
+            string classType = reader[Schema.Character.Field.Class] as string;
+
+            return new Character
+            {
+                Name = string.IsNullOrEmpty(name) ? "" : HttpUtility.JavaScriptStringEncode(name),
+                Gender = string.IsNullOrEmpty(gender) ? "" : HttpUtility.JavaScriptStringEncode(gender),
+                Biography = string.IsNullOrEmpty(bio) ? "" : HttpUtility.JavaScriptStringEncode(bio),
+                Race = string.IsNullOrEmpty(race) ? "" : HttpUtility.JavaScriptStringEncode(race),
+                Class = string.IsNullOrEmpty(classType) ? "" : HttpUtility.JavaScriptStringEncode(classType),
+                Age = reader[Schema.Character.Field.Age] as long? ?? 0,
+                Level = reader[Schema.Character.Field.Level] as long? ?? 0,
+                Con = reader[Schema.Character.Field.Constitution] as long? ?? 0,
+                Dex = reader[Schema.Character.Field.Dexterity] as long? ?? 0,
+                Str = reader[Schema.Character.Field.Strength] as long? ?? 0,
+                Cha = reader[Schema.Character.Field.Charisma] as long? ?? 0,
+                Intel = reader[Schema.Character.Field.Intelligence] as long? ?? 0,
+                Wis = reader[Schema.Character.Field.Wisdom] as long? ?? 0
+            };
         }
     }
 }
