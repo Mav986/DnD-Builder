@@ -22,7 +22,7 @@ namespace DnDBuilderLinux.Controllers
         }
 
         /// <summary>
-        ///     Get the names and DnD5eapi urls for all races
+        ///     CachedGet the names and DnD5eapi urls for all races
         /// </summary>
         /// <returns>JSON containing all DnD 5e race names</returns>
         /// <exception cref="HttpResponseException"></exception>
@@ -43,7 +43,7 @@ namespace DnDBuilderLinux.Controllers
         }
 
         /// <summary>
-        ///     Get the names and DnD5eapi urls for all races
+        ///     CachedGet the names and DnD5eapi urls for all races
         /// </summary>
         /// <returns>JSON containing all DnD 5e class names and urls</returns>
         /// <exception cref="HttpResponseException"></exception>
@@ -59,6 +59,21 @@ namespace DnDBuilderLinux.Controllers
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
+                    e.Message + " If the problem persists, contact a server administrator"));
+            }
+        }
+
+        [HttpGet]
+        [Route("spellcaster/{classType}")]
+        public bool GetSpellcaster(string classType)
+        {
+            try
+            {
+                return _dndHandler.IsCaster(classType);
+            }
+            catch (DndException e)
+            {
+                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
                     e.Message + " If the problem persists, contact a server administrator"));
             }
         }

@@ -6,7 +6,6 @@ using System.Net.Http.Headers;
 using System.Web.Http;
 using DnDBuilderLinux.Database;
 using DnDBuilderLinux.Handlers;
-using DnDBuilderLinux.Models;
 using Newtonsoft.Json.Linq;
 
 namespace DnDBuilderLinux.Controllers
@@ -29,7 +28,7 @@ namespace DnDBuilderLinux.Controllers
         /// <exception cref="HttpResponseException"></exception>
         [HttpPost]
         [Route("add")]
-        public void AddCharacter([FromBody] Character character)
+        public void AddCharacter([FromBody] JObject character)
         {
             try
             {
@@ -46,7 +45,7 @@ namespace DnDBuilderLinux.Controllers
         }
 
         /// <summary>
-        ///     Get all characters in DnDBuilder
+        ///     CachedGet all characters in DnDBuilder
         /// </summary>
         /// <returns>A JSON array containing JSON with every character's data</returns>
         /// <exception cref="HttpResponseException"></exception>
@@ -67,7 +66,7 @@ namespace DnDBuilderLinux.Controllers
         }
 
         /// <summary>
-        ///     Get a single character from within DnDBuilder
+        ///     CachedGet a single character from within DnDBuilder
         /// </summary>
         /// <param name="characterName">The name of the character</param>
         /// <returns>JSON containing all the specified character's data</returns>

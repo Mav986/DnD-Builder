@@ -25,10 +25,11 @@ namespace DnDBuilderLinux.Handlers
         /// </summary>
         /// <param name="character">Character to add</param>
         /// <exception cref="CharacterException"></exception>
-        public void AddCharacter(Character character)
+        public void AddCharacter(JObject newChar)
         {
             try
             {
+                Character character = CreateCharacter(newChar);
                 _dndHandler.ValidateAbilityScores(character);
                 _db.InsertCharacter(character);
             }
@@ -43,7 +44,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Get all characters currently stored in DnDBuilder
+        ///     CachedGet all characters currently stored in DnDBuilder
         /// </summary>
         /// <returns>A JArray containing all character's details</returns>
         /// <exception cref="CharacterException"></exception>
@@ -75,7 +76,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Get a single character from within DnDBuilder
+        ///     CachedGet a single character from within DnDBuilder
         /// </summary>
         /// <param name="name">Name of the character to retreive</param>
         /// <returns>A JObject containing the specified character's details</returns>
@@ -221,6 +222,22 @@ namespace DnDBuilderLinux.Handlers
                 Intel = reader[Schema.Character.Field.Intelligence] as long? ?? 0,
                 Wis = reader[Schema.Character.Field.Wisdom] as long? ?? 0
             };
+        }
+
+        private Character CreateCharacter(JObject json)
+        {
+            json = SanitizeCharacter(json);
+            return json.ToObject<Character>();
+        }
+
+        private static JObject SanitizeCharacter(JObject json)
+        {
+            foreach (KeyValuePair<string, JToken> token in json)
+            {
+                json[token.Key] = HttpUtility.HtmlEncode(token.Value);
+            }
+
+            return json;
         }
     }
 }

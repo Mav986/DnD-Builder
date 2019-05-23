@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Web;
 using DnDBuilderLinux.Models;
 using DnDBuilderLinux.Web;
 using Newtonsoft.Json.Linq;
@@ -20,7 +21,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Get all race names
+        ///     CachedGet all race names
         /// </summary>
         /// <returns>JSON array containing the official 5e race names</returns>
         public JArray GetAllRaces()
@@ -36,7 +37,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Get all class names
+        ///     CachedGet all class names
         /// </summary>
         /// <returns>JSON array containing the official 5e race names</returns>
         /// <exception cref="DndException"></exception>
@@ -60,7 +61,12 @@ namespace DnDBuilderLinux.Handlers
         public bool CalculateCaster(JObject character)
         {
             JToken classType = character["class"] ?? "";
-            JObject classJson = GetClassJson(classType.ToString());
+            return IsCaster(classType.ToString());
+        }
+
+        public bool IsCaster(string classType)
+        {
+            JObject classJson = GetClassJson(classType);
             return classJson["spellcasting"] != null;
         }
 
@@ -114,7 +120,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Get a JArray of names from a JObject retreived from the callback
+        ///     CachedGet a JArray of names from a JObject retreived from the callback
         /// </summary>
         /// <param name="callback"></param>
         /// <returns></returns>
@@ -128,7 +134,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Get a JObject of races from the DnDBuilder cache
+        ///     CachedGet a JObject of races from the DnDBuilder cache
         /// </summary>
         /// <returns>A JObject containing a JArray of race name to url mappings</returns>
         private JObject GetRacesFromCache()
@@ -139,7 +145,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Get a JObject of classes from the DnDBuilder cache
+        ///     CachedGet a JObject of classes from the DnDBuilder cache
         /// </summary>
         /// <returns>A JObject containing a JArray of class name to url mappings</returns>
         private JObject GetClassesFromCache()
@@ -150,7 +156,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Get a dnd5eapi url from a JToken by name
+        ///     CachedGet a dnd5eapi url from a JToken by name
         /// </summary>
         /// <param name="array">A JToken containing a list of name and url mappings</param>
         /// <param name="name">A valid dnd5eapi name</param>
@@ -167,14 +173,14 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Get a JObject containing a classes data
+        ///     CachedGet a JObject containing a classes data
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
         private JObject GetClassJson(string name)
         {
             JObject json = GetClassesFromCache();
-            string url = GetUrlFromJToken(json["results"], name);
+            string url = GetUrlFromJToken(json["results"], HttpUtility.HtmlEncode(name));
 
             return _reqHandler.GetFromCache(name, url);
         }

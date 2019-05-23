@@ -25,7 +25,7 @@ namespace DnDBuilderLinux.Web
         }
 
         /// <summary>
-        ///     Get a JObject from the cache or remote server
+        ///     CachedGet a JObject from the cache or remote server
         /// </summary>
         /// <param name="key">A unique key to locate a cache item</param>
         /// <param name="url">A url to call if item is not in the cache</param>
