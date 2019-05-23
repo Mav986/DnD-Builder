@@ -76,7 +76,7 @@ namespace DnDBuilderLinux.Database
                 public const string Intelligence = "intel";
                 public const string Wisdom = "wis";
 
-                public static ReadOnlyCollection<string> AllFields = new ReadOnlyCollection<string>(
+                public static readonly ReadOnlyCollection<string> AllFields = new ReadOnlyCollection<string>(
                     new List<string>
                     {
                         Name,

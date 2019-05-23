@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using DnDBuilderLinux.Models;
@@ -26,7 +25,14 @@ namespace DnDBuilderLinux.Handlers
         /// <returns>JSON array containing the official 5e race names</returns>
         public JArray GetAllRaces()
         {
-            return GetNameArray(GetRacesFromCache);
+            try
+            {
+                return GetNameArray(GetRacesFromCache);
+            }
+            catch (HttpRequestException e)
+            {
+                throw new DndException("Error retreiving races.", e);
+            }
         }
 
         /// <summary>
@@ -36,27 +42,13 @@ namespace DnDBuilderLinux.Handlers
         /// <exception cref="DndException"></exception>
         public JArray GetAllClasses()
         {
-            return GetNameArray(GetClassesFromCache);
-        }
-
-        /// <summary>
-        ///     Get a JArray of names from a JObject retreived from the callback
-        /// </summary>
-        /// <param name="callback"></param>
-        /// <returns></returns>
-        /// <exception cref="DndException"></exception>
-        private JArray GetNameArray(Func<JObject> callback)
-        {
             try
             {
-                JObject json = callback();
-                JArray nameList = ExtractNamesToArray(json);
-
-                return nameList;
+                return GetNameArray(GetClassesFromCache);
             }
             catch (HttpRequestException e)
             {
-                throw new DndException(e.Message, e);
+                throw new DndException("Error retreiving classes.", e);
             }
         }
 
@@ -67,7 +59,8 @@ namespace DnDBuilderLinux.Handlers
         /// <returns>True if this character is a caster, false otherwise</returns>
         public bool CalculateCaster(JObject character)
         {
-            JObject classJson = GetClassJson(character["class"].ToString());
+            JToken classType = character["class"] ?? "";
+            JObject classJson = GetClassJson(classType.ToString());
             return classJson["spellcasting"] != null;
         }
 
@@ -81,7 +74,11 @@ namespace DnDBuilderLinux.Handlers
         {
             try
             {
-                JObject classData = GetClassJson(character["class"].ToString());
+                JToken classType = character["class"];
+                
+                if (classType == null) throw new DndException("Class type cannot be null.");
+                
+                JObject classData = GetClassJson(classType.ToString());
                 bool hitDieFound = classData.TryGetValue("hit_die", out JToken hitDieToken);
                 bool levelFound = character.TryGetValue("level", out JToken levelToken);
                 bool conFound = character.TryGetValue("con", out JToken conToken);
@@ -95,9 +92,9 @@ namespace DnDBuilderLinux.Handlers
 
                 return level * hitDie + con;
             }
-            catch (InvalidCastException)
+            catch (InvalidCastException e)
             {
-                throw new DndException("Unable to determine hitpoints for " + character["name"]);
+                throw new DndException("Unable to determine hitpoints for specified character", e);
             }
         }
 
@@ -114,6 +111,20 @@ namespace DnDBuilderLinux.Handlers
                                 character.Cha + character.Intel + character.Wis;
             
             if(abilityScore != totalAbilityScore) throw new DndException("Total ability score '" + abilityScore +"' invalid");
+        }
+
+        /// <summary>
+        ///     Get a JArray of names from a JObject retreived from the callback
+        /// </summary>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        /// <exception cref="DndException"></exception>
+        private static JArray GetNameArray(Func<JObject> callback)
+        {
+            JObject json = callback();
+            JArray nameList = ExtractNamesToArray(json);
+
+            return nameList;
         }
 
         /// <summary>
@@ -145,7 +156,7 @@ namespace DnDBuilderLinux.Handlers
         /// <param name="name">A valid dnd5eapi name</param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        private string GetUrlFromJToken(JToken array, string name)
+        private static string GetUrlFromJToken(JToken array, string name)
         {
             JObject nameAndUrl = array.Children<JObject>()
                 .FirstOrDefault(r => r["name"].ToString().Equals(name, StringComparison.OrdinalIgnoreCase));
@@ -173,7 +184,7 @@ namespace DnDBuilderLinux.Handlers
         /// </summary>
         /// <param name="json">JObject to extract names from</param>
         /// <returns>A JArray containing strings</returns>
-        private JArray ExtractNamesToArray(JObject json)
+        private static JArray ExtractNamesToArray(JObject json)
         {
             JArray names = new JArray();
             

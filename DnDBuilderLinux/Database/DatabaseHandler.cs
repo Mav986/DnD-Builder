@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Web;
 using DnDBuilderLinux.Models;
 using Mono.Data.Sqlite;
 
@@ -45,7 +44,7 @@ namespace DnDBuilderLinux.Database
         /// </summary>
         /// <returns>An enumerable containing all Characters</returns>
         /// <exception cref="DatabaseException"></exception>
-        public List<Character> SelectAllCharacters(Func<IDataRecord, Character> sanitizeCallback)
+        public IEnumerable<Character> SelectAllCharacters(Func<IDataRecord, Character> sanitizeCallback)
         {
             try
             {
@@ -72,6 +71,7 @@ namespace DnDBuilderLinux.Database
         ///     Select a character from the database
         /// </summary>
         /// <param name="name">Name of the character to select</param>
+        /// <param name="sanitizeCharacter">Callback to sanitize character fields before creating an object</param>
         /// <returns>The selected Character object</returns>
         /// <exception cref="DatabaseException"></exception>
         public Character SelectCharacter(string name, Func<IDataRecord, Character> sanitizeCharacter)

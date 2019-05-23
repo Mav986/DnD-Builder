@@ -34,11 +34,11 @@ namespace DnDBuilderLinux.Controllers
             {
                 return _dndHandler.GetAllRaces();
             }
-            catch (Exception e)
+            catch (DndException e)
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
-                    "Something went wrong. If the problem persists, contact a server administrator"));
+                    e.Message + " If the problem persists, contact a server administrator"));
             }
         }
 
@@ -55,11 +55,11 @@ namespace DnDBuilderLinux.Controllers
             {
                 return _dndHandler.GetAllClasses();
             }
-            catch (Exception e)
+            catch (DndException e)
             {
                 Console.WriteLine(e);
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
-                    "Something went wrong. If the problem persists, contact a server administrator"));
+                    e.Message + " If the problem persists, contact a server administrator"));
             }
         }
     }

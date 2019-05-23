@@ -6,19 +6,10 @@ namespace DnDBuilderLinux.Models
     public class Character
     {
         private string _name;
-        private long _age;
         private string _gender;
         private string _biography;
-        private long _level;
         private string _race;
         private string _class;
-
-        private long _con;
-        private long _dex;
-        private long _str;
-        private long _cha;
-        private long _intel;
-        private long _wis;
 
         [Required]
         [JsonProperty("name")]
@@ -31,11 +22,7 @@ namespace DnDBuilderLinux.Models
         [Required]
         [Range(0, 500, ErrorMessage = "{0} must be between {1} and {2}")]
         [JsonProperty("age")]
-        public long Age
-        {
-            get => _age;
-            set => _age = value;
-        }
+        public long Age { get; set; }
 
         [Required]
         [JsonProperty("gender")]
@@ -56,11 +43,7 @@ namespace DnDBuilderLinux.Models
         [Required]
         [Range(1, 20, ErrorMessage = "Level must be between 1 and 20")]
         [JsonProperty("level")]
-        public long Level
-        {
-            get => _level;
-            set => _level = value;
-        }
+        public long Level { get; set; }
 
         [Required]
         [JsonProperty("race")]
@@ -80,50 +63,26 @@ namespace DnDBuilderLinux.Models
 
         [Required]
         [JsonProperty("con")]
-        public long Con
-        {
-            get => _con;
-            set => _con = value;
-        }
+        public long Con { get; set; }
 
         [Required]
         [JsonProperty("dex")]
-        public long Dex
-        {
-            get => _dex;
-            set => _dex = value;
-        }
+        public long Dex { get; set; }
 
         [Required]
         [JsonProperty("str")]
-        public long Str
-        {
-            get => _str;
-            set => _str = value;
-        }
+        public long Str { get; set; }
 
         [Required]
         [JsonProperty("cha")]
-        public long Cha
-        {
-            get => _cha;
-            set => _cha = value;
-        }
+        public long Cha { get; set; }
 
         [Required]
         [JsonProperty("intel")]
-        public long Intel
-        {
-            get => _intel;
-            set => _intel = value;
-        }
+        public long Intel { get; set; }
 
         [Required]
         [JsonProperty("wis")]
-        public long Wis
-        {
-            get => _wis;
-            set => _wis = value;
-        }
+        public long Wis { get; set; }
     }
 }

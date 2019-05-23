@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -176,7 +175,7 @@ namespace DnDBuilderLinux.Handlers
         /// <param name="json">JObject to generate mappings from</param>
         /// <returns>A dictionary containing all property : value mappings from the JObject</returns>
         /// <exception cref="CharacterException"></exception>
-        private Dictionary<string, string> GeneratePropertyDict(JObject json)
+        private static Dictionary<string, string> GeneratePropertyDict(JObject json)
         {
             Dictionary<string, string> characterDict = new Dictionary<string, string>();
             
