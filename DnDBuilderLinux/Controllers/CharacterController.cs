@@ -24,21 +24,21 @@ namespace DnDBuilderLinux.Controllers
         /// <summary>
         ///     Add a Character to DnDBuilder
         /// </summary>
-        /// <param name="character">A valid Character object</param>
+        /// <param name="character">A JSON object containing all required character parameters</param>
         /// <exception cref="HttpResponseException"></exception>
+        /// <returns>201 Created if sucecssful, 400 Bad Request otherwise</returns>
         [HttpPost]
         [Route("add")]
-        public void AddCharacter([FromBody] JObject character)
+        public HttpResponseMessage AddCharacter([FromBody] JObject character)
         {
             try
             {
-                if (!ModelState.IsValid) throw new CharacterException("Adding character failed, invalid data");
                 _charHandler.AddCharacter(character);
+                return Request.CreateResponse(HttpStatusCode.Created);
             }
             catch (CharacterException e)
             {
-                Console.WriteLine(e);
-                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest,
                     e.Message + " Please check your data and try again. " +
                     "If the problem persists, contact a server administrator"));
             }

@@ -27,7 +27,7 @@ namespace DnDBuilderLinux.Database
             {
                 using (SqliteConnection dbConn = GetConnection())
                 {
-                    if (CheckExists(character.Name)) throw new DatabaseException("Character already exists");
+                    if (CheckExists(character.Name)) throw new InsertException("Character already exists.");
                     SqliteCommand insert = new SqliteCommand(Schema.Character.Query.InsertCharacter, dbConn);
                     insert = AddCharacterParams(character, insert);
                     insert.ExecuteNonQuery();
