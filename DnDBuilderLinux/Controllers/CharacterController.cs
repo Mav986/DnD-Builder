@@ -157,7 +157,7 @@ namespace DnDBuilderLinux.Controllers
                     Content = new StreamContent(xmlFile)
                 };
                 responseMsg.Content.Headers.ContentDisposition =
-                    new ContentDispositionHeaderValue("attachment") {FileName = "Text.xml"};
+                    new ContentDispositionHeaderValue("attachment") {FileName = filename};
                 responseMsg.Content.Headers.ContentType = new MediaTypeHeaderValue("application/xml");
 
                 return responseMsg;
