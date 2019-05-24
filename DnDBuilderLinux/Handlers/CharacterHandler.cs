@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Web;
 using System.Xml.Serialization;
 using DnDBuilderLinux.Database;
@@ -23,24 +25,61 @@ namespace DnDBuilderLinux.Handlers
         /// <summary>
         ///     Add a character to DnDBuilder
         /// </summary>
-        /// <param name="character">Character to add</param>
+        /// <param name="newChar">Character to add</param>
         /// <exception cref="CharacterException"></exception>
         public void AddCharacter(JObject newChar)
         {
             try
             {
                 Character character = CreateCharacter(newChar);
-                _dndHandler.ValidateAbilityScores(character);
+                ValidateCharacter(character);
                 _db.InsertCharacter(character);
             }
             catch (DatabaseException e)
             {
                 throw new CharacterException("Error adding character to DnDBuilder.", e);
             }
-            catch (DndException e)
-            {
-                throw new CharacterException("Ability scores invalid: Ability scores must combine to equal 20.", e);
-            }
+        }
+
+        private void ValidateCharacter(Character character)
+        {
+            if (string.IsNullOrEmpty(character.Name)) throw new CharacterException("Name is required.");
+            if (character.Age < 0 || character.Age > 500) throw new CharacterException("Age must be between 0 and 500.");
+            if (character.Biography.Length > 500) throw new CharacterException("Biography must be less than 500 characters.");
+            if (character.Level < 1 || character.Level > 20) throw new CharacterException("Level must be between 1 and 20.");
+            if (!ValidateRace(character.Race)) throw new CharacterException("Race is invalid, please choose from the dropdown list.");
+            if (!ValidateClass(character.Class)) throw new CharacterException("Class is invalid, please choose from the dropdown list.");
+            ValidateAbilityScores(character);
+        }
+
+        private bool ValidateRace(string race)
+        {
+            JArray allRaces = _dndHandler.GetAllRaces();
+            return allRaces.Any(x => 
+                string.Equals(x.Value<string>(), race, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private bool ValidateClass(string classType)
+        {
+            JArray allClasses = _dndHandler.GetAllClasses();
+            return allClasses.Any(x =>
+                string.Equals(x.Value<string>(), classType, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        ///     Validate a character's total ability scores.
+        ///     A character's ability scores are considered valid if they add up to a total of 20.
+        /// </summary>
+        /// <param name="character"></param>
+        /// <exception cref="CharacterException"></exception>
+        private void ValidateAbilityScores(Character character)
+        {
+            const int totalAbilityScore = 20;
+            long abilityScore = character.Con + character.Dex + character.Str + 
+                                character.Cha + character.Intel + character.Wis;
+            
+            if(abilityScore != totalAbilityScore) 
+                throw new CharacterException("Total ability score '" + abilityScore +"' is invalid.");
         }
 
         /// <summary>
@@ -107,8 +146,8 @@ namespace DnDBuilderLinux.Handlers
             {
                 string name = (string) json[Schema.Character.Field.Name];
                 json.Remove(Schema.Character.Field.Name);
-
                 Dictionary<string, string> propertyDict = GeneratePropertyDict(json);
+                
                 _db.UpdateCharacter(name, propertyDict);
             }
             catch (DatabaseException e)

@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Web;
-using DnDBuilderLinux.Models;
 using DnDBuilderLinux.Web;
 using Newtonsoft.Json.Linq;
 
@@ -102,21 +101,6 @@ namespace DnDBuilderLinux.Handlers
             {
                 throw new DndException("Unable to determine hitpoints for specified character", e);
             }
-        }
-
-        /// <summary>
-        ///     Validate a character's total ability scores.
-        ///     A character's ability scores are considered valid if they add up to a total of 20.
-        /// </summary>
-        /// <param name="character"></param>
-        /// <exception cref="DndException"></exception>
-        public void ValidateAbilityScores(Character character)
-        {
-            const int totalAbilityScore = 20;
-            long abilityScore = character.Con + character.Dex + character.Str + 
-                                character.Cha + character.Intel + character.Wis;
-            
-            if(abilityScore != totalAbilityScore) throw new DndException("Total ability score '" + abilityScore +"' invalid");
         }
 
         /// <summary>

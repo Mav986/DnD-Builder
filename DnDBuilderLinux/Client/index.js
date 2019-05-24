@@ -60,7 +60,7 @@ async function Delete(name){
  */
 async function CachedGet(path, storageKey) {
     let data = sessionStorage.getItem(storageKey);
-    if(data == null) data = await Get(path, storageKey);
+    if(data == null) data = await Get(path);
     sessionStorage.setItem(storageKey, data);
     
     return data;
@@ -86,6 +86,7 @@ async function PopulateSelectFromArray(selectName, data, generateStringCallback)
             let selectString = await generateStringCallback(retVal[ii]);
             selectBox.options[ii] = new Option(selectString);
         }
+        selectBox.selectedIndex = 0;
     }
     catch (e) {
         console.log(data);
@@ -127,7 +128,7 @@ async function UpdateAttributesRemaining(){
  */
 async function GetSpellcaster(){
     let classType = document.getElementById('classSelect').value;
-    let json = await CachedGet('dnd/spellcaster/' + classType, classType + ' is caster?');
+    let json = await CachedGet('dnd/spellcaster/' + classType, classType + ':caster');
     const isCaster = JSON.parse(json);
     document.getElementById('spellInput').value = isCaster ? 'Yes' : 'No';
 }
@@ -161,28 +162,30 @@ async function InitCreateCharacter(){
 
     let raceKey = 'raceSelect';
     let raceData = await CachedGet('dnd/races', raceKey);
-    PopulateSelectFromArray(raceKey, raceData, CreateRaceOrClassOption);
+    await PopulateSelectFromArray(raceKey, raceData, CreateRaceOrClassOption);
 
     let classKey = 'classSelect';
     let classData = await CachedGet('dnd/classes', classKey);
-    PopulateSelectFromArray(classKey, classData, CreateRaceOrClassOption);
+    await PopulateSelectFromArray(classKey, classData, CreateRaceOrClassOption);
+    
+    await GetSpellcaster();    
 }
 
 /*
  * Initialize the Edit Character page
  */
 async function InitEditCharacter(){
+    await InitCreateCharacter();
     let characterName = sessionStorage.getItem('charName');
     let path = 'character/view/' + characterName;
-    let charData = await CachedGet(path, characterName);
-    charData = JSON.parse(charData);
+    let charData = await Get(path);
+    charData = JSON.parse(await charData);
     let form = document.getElementById('submissionForm');
-    await InitCreateCharacter();
 
     for(let element of form.elements){
         if(charData[element.name] != null){
             if(element.type === 'select-one'){
-                SetSelected(element, charData);
+                await SetSelected(element, charData);
             }
             else{
                 element.value = charData[element.name];
@@ -196,7 +199,7 @@ async function InitEditCharacter(){
  */
 async function InitViewCharacters(){
     let charData = await Get('character/view/all', 'selectBox');
-    PopulateSelectFromArray('selectBox', charData, CreateCharacterOption);
+    await PopulateSelectFromArray('selectBox', charData, CreateCharacterOption);
     StoreSelectedCharacter();
 }
 
@@ -204,15 +207,15 @@ async function InitViewCharacters(){
  * Create a new character with current form details
  */
 async function CreateCharacter(){
-    let path = '/character/add';
-    let scoresValid = await ValidateScores();
-    if(scoresValid === true){
+    try {
+        let path = '/character/add';
+        await ValidateName();
+        await ValidateScores();
         let json = await ConvertFormToJson();
         Post(path, JSON.stringify(json));
     }
-    else
-    {
-        alert("Total ability points spent must equal 20");
+    catch(error){
+        alert(error + ' must be filled out');
     }
 }
 
@@ -220,19 +223,25 @@ async function CreateCharacter(){
  * Save a character's details
  */
 async function SaveCharacter(){
-    let json = await ConvertFormToJson();
-    let path = 'character/update';
-    sessionStorage.setItem(json['name'], JSON.stringify(json));
-    await Put(path, json);
-    InitEditCharacter();
+    try {
+        await ValidateName();
+        await ValidateScores();
+        let json = await ConvertFormToJson();
+        let path = 'character/update';
+        sessionStorage.setItem(json['name'], JSON.stringify(json));
+        await Put(path, json);
+        InitEditCharacter();
+    }
+    catch(error){
+        alert(error + ' must be filled out');
+    }
 }
 
 /*
  * Download XML from server for selected character
  */
 async function DownloadCharacter(){
-    let selectBox = document.getElementById('selectBox');
-    let characterName = selectBox.value.toString();
+    let characterName = await GetSelectedNameFromList();
     let path = '/character/xml/' + characterName;
     LoadPage(path);
 }
@@ -244,10 +253,9 @@ async function DeleteCharacter(){
     let confirmed = confirm("Are you sure you want to delete this character?");
 
     if(confirmed){
-        let selectBox = document.getElementById('selectBox');
-        let characterName = selectBox.value.toString();
+        let characterName = document.getElementById('nameInput').value;
         await Delete(characterName);
-        await GenerateSelectOptions(selectBox);
+        await LoadPage('/Client/view.html')
     }
 }
 
@@ -291,6 +299,16 @@ async function GenerateSelectOptions(selectBox){
 }
 
 /*
+ * Validate that the name field has text entered 
+ */
+async function ValidateName(){
+    let name = document.getElementById('nameInput').value;
+    if(!name || !name.trim()){
+        throw 'Name';
+    }
+}
+
+/*
  * Validate that ability scores total 20
  */
 async function ValidateScores(){
@@ -301,7 +319,9 @@ async function ValidateScores(){
         total = total + parseInt(score.value);
     }
     
-    return total === 20;
+    if(total !== 20){
+        throw 'Ability scores';
+    }
 }
 
 /*
@@ -338,4 +358,13 @@ async function CreateCharacterOption(json){
     let level = json['level'] != null ? json['level'] : json;
 
     return name + " : " + race + " : " + classType + " : " + level;
+}
+
+/*
+ * Get the selected character's name from the view list
+ */
+async function GetSelectedNameFromList(){
+    let selectBox = document.getElementById('selectBox');
+    let characterOption = selectBox.value.toString();
+    return characterOption.split(' : ')[0];
 }

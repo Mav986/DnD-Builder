@@ -12,10 +12,10 @@
 
     Name: <input required name="name" id="nameInput" type="text" disabled>
     Race: <select required name="race" id="raceSelect"></select>
-    Class: <select required name="class" id="classSelect"></select>
+    Class: <select required name="class" id="classSelect" onchange="GetSpellcaster()"></select>
     <br>
     <br>
-    Gender: <input required name="gender" id="genderInput" type="text" maxlength="15">
+    Gender: <input name="gender" id="genderInput" type="text" maxlength="15">
     Age: <input required name="age" id="ageInput" type="number" min="0" max="500" step="1" value="18">
     Level: <input required name="level" id="levelInput" type="number" min="1" max="20" step="1" value="1">
     Spellcaster: <input id="spellInput" type="text" disabled>
@@ -24,18 +24,19 @@
     Ability Scores - Total points remaining: <div id="abilityScoreRem" style="display: inline">20</div>
     <br>
     <br>
-    Con: <input required name="con" id="conInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
-    Dex: <input required name="dex" id="dexInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
-    Str: <input required name="str" id="strInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
+    Con: <input name="con" id="conInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
+    Dex: <input name="dex" id="dexInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
+    Str: <input name="str" id="strInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
     <br>
-    Cha: <input required name="cha" id="chaInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
-    Int: <input required name="intel" id="intInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
-    Wis: <input required name="wis" id="wisInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
+    Cha: <input name="cha" id="chaInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
+    Int: <input name="intel" id="intInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
+    Wis: <input name="wis" id="wisInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
     <br>
     <br>
     Biography<br><textarea name="bio" rows="10" cols="70" maxlength="500"></textarea>
     <br>
 </form>
 <button id="updateBtn" onclick="SaveCharacter()">Update</button>
+<button id="deleteCharBtn" onclick="DeleteCharacter()">Delete</button>
 </body>
 </html>

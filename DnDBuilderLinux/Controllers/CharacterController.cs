@@ -126,7 +126,7 @@ namespace DnDBuilderLinux.Controllers
             catch (CharacterException e)
             {
                 Console.WriteLine(e);
-                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest,
+                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.InternalServerError,
                     e.Message + " Please check your data and try again. " +
                     "If the problem persists, contact a server administrator"));
             }

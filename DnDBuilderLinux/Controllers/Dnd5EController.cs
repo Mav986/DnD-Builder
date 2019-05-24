@@ -63,6 +63,12 @@ namespace DnDBuilderLinux.Controllers
             }
         }
 
+        /// <summary>
+        ///     Get a boolean value indicating whether the class is a caster or not
+        /// </summary>
+        /// <param name="classType">A valid DND 5E class</param>
+        /// <returns>true if the class is a caster, false otherwise</returns>
+        /// <exception cref="HttpResponseException"></exception>
         [HttpGet]
         [Route("spellcaster/{classType}")]
         public bool GetSpellcaster(string classType)

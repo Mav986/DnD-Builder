@@ -11,7 +11,6 @@ namespace DnDBuilderLinux.Models
         private string _race;
         private string _class;
 
-        [Required]
         [JsonProperty("name")]
         public string Name
         {
@@ -19,12 +18,9 @@ namespace DnDBuilderLinux.Models
             set => _name = string.IsNullOrWhiteSpace(value) ? "" : value;
         }
 
-        [Required]
-        [Range(0, 500, ErrorMessage = "{0} must be between {1} and {2}")]
         [JsonProperty("age")]
         public long Age { get; set; }
 
-        [Required]
         [JsonProperty("gender")]
         public string Gender
         {
@@ -32,7 +28,6 @@ namespace DnDBuilderLinux.Models
             set => _gender = value;
         }
 
-        [MaxLength(500, ErrorMessage = "Biography must not exceed 500 characters")]
         [JsonProperty("bio")]
         public string Biography
         {
@@ -40,12 +35,10 @@ namespace DnDBuilderLinux.Models
             set => _biography = value;
         }
 
-        [Required]
         [Range(1, 20, ErrorMessage = "Level must be between 1 and 20")]
         [JsonProperty("level")]
         public long Level { get; set; }
 
-        [Required]
         [JsonProperty("race")]
         public string Race
         {
@@ -53,7 +46,6 @@ namespace DnDBuilderLinux.Models
             set => _race = string.IsNullOrWhiteSpace(value) ? "" : value; // Race will be a preset string from a dropdown box
         }
 
-        [Required]
         [JsonProperty("class")]
         public string Class
         {
@@ -61,27 +53,21 @@ namespace DnDBuilderLinux.Models
             set => _class = string.IsNullOrWhiteSpace(value) ? "" : value; // Class will be a preset string from a dropdown box
         }
 
-        [Required]
         [JsonProperty("con")]
         public long Con { get; set; }
 
-        [Required]
         [JsonProperty("dex")]
         public long Dex { get; set; }
 
-        [Required]
         [JsonProperty("str")]
         public long Str { get; set; }
 
-        [Required]
         [JsonProperty("cha")]
         public long Cha { get; set; }
 
-        [Required]
         [JsonProperty("intel")]
         public long Intel { get; set; }
 
-        [Required]
         [JsonProperty("wis")]
         public long Wis { get; set; }
     }
