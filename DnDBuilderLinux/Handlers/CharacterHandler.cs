@@ -7,7 +7,6 @@ using System.Web;
 using System.Xml.Serialization;
 using DnDBuilderLinux.Database;
 using DnDBuilderLinux.Models;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace DnDBuilderLinux.Handlers
@@ -39,12 +38,16 @@ namespace DnDBuilderLinux.Handlers
             {
                 throw new CharacterException(e.Message, e);
             }
+            catch (DatabaseException e)
+            {
+                throw new CharacterException("Internal error while adding character.", e);
+            }
         }
 
         /// <summary>
         ///     Get all characters currently stored in DnDBuilder
         /// </summary>
-        /// <returns>A JArray containing all character's details</returns>
+        /// <returns>A JArray containing JObjects, each of which has a small summary of each character</returns>
         /// <exception cref="CharacterException"></exception>
         public JArray GetAllCharacters()
         {
@@ -68,28 +71,12 @@ namespace DnDBuilderLinux.Handlers
             }
             catch (DatabaseException e)
             {
-                throw new CharacterException("Error retreiving characters from DnDBuilder.", e);
+                throw new CharacterException("Internal error while retrieving characters.", e);
             }
         }
 
         /// <summary>
-        ///     Create a minified JSON containing only the name, race, class, and level of the character
-        /// </summary>
-        /// <param name="json">JObject to minify</param>
-        /// <returns>A JObject with only the summarized attributes</returns>
-        private JObject CreateMinifiedJson(JObject json)
-        {
-            return new JObject
-            {
-                ["name"] = json["name"],
-                ["race"] = json["race"],
-                ["class"] = json["class"],
-                ["level"] = json["level"]
-            };
-        }
-
-        /// <summary>
-        ///     CachedGet a single character from within DnDBuilder
+        ///     Get a single character from within DnDBuilder
         /// </summary>
         /// <param name="name">Name of the character to retreive</param>
         /// <returns>A JObject containing the specified character's details</returns>
@@ -98,14 +85,21 @@ namespace DnDBuilderLinux.Handlers
         {
             try
             {
-                Character selectedChar = _db.SelectCharacter(name, SanitizeCharacter);
-                JObject json = JObject.FromObject(selectedChar);
+                DataTable selectedChar = _db.SelectCharacter(name);
+                JArray array = JArray.FromObject(selectedChar);
+                JObject json = JObject.FromObject(array[0]);
+                SanitizeJson(ref json);
+                ValidateJson(ref json);
 
                 return AddCalculatedAttributes(json);
             }
+            catch (SelectException e)
+            {
+                throw new CharacterException(e.Message, e);
+            }
             catch (DatabaseException e)
             {
-                throw new CharacterException("Error retreiving character from DnDBuilder.", e);
+                throw new CharacterException("Internal error while retrieving character.", e);
             }
         }
 
@@ -330,6 +324,22 @@ namespace DnDBuilderLinux.Handlers
             if (!classesValid) throw new CharacterException("Invalid class.");
             if(attributeTotal != maxAbilityScores) 
                 throw new CharacterException($"Invalid attribute scores, total points must equal {maxAbilityScores}.");
+        }
+
+        /// <summary>
+        ///     Create a minified JSON containing only the name, race, class, and level of the character
+        /// </summary>
+        /// <param name="json">JObject to minify</param>
+        /// <returns>A JObject with only the summarized attributes</returns>
+        private static JObject CreateMinifiedJson(JObject json)
+        {
+            return new JObject
+            {
+                ["name"] = json["name"],
+                ["race"] = json["race"],
+                ["class"] = json["class"],
+                ["level"] = json["level"]
+            };
         }
     }
 }

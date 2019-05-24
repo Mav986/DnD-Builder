@@ -48,15 +48,15 @@ namespace DnDBuilderLinux.Database
         {
             try
             {
-                DataTable table = new DataTable();
                 using (SqliteConnection dbConn = GetConnection())
                 {
-                    SqliteCommand cmd = new SqliteCommand(Schema.Character.Query.SelectAll, dbConn);
-                    SqliteDataAdapter adapter = new SqliteDataAdapter(cmd);
+                    DataTable table = new DataTable();
+                    SqliteCommand selectAll = new SqliteCommand(Schema.Character.Query.SelectAll, dbConn);
+                    SqliteDataAdapter adapter = new SqliteDataAdapter(selectAll);
                     adapter.Fill(table);
+                    
+                    return table;
                 }
-
-                return table;
             }
             catch (SqliteException e)
             {
@@ -68,21 +68,23 @@ namespace DnDBuilderLinux.Database
         ///     Select a character from the database
         /// </summary>
         /// <param name="name">Name of the character to select</param>
-        /// <param name="sanitizeCharacter">Callback to sanitize character fields before creating an object</param>
         /// <returns>The selected Character object</returns>
         /// <exception cref="DatabaseException"></exception>
-        public Character SelectCharacter(string name, Func<IDataRecord, Character> sanitizeCharacter)
+        public DataTable SelectCharacter(string name)
         {
             
             try
             {
                 using (SqliteConnection dbConn = GetConnection())
                 {
+                    DataTable table = new DataTable();
                     SqliteCommand select = new SqliteCommand(Schema.Character.Query.SelectCharacter, dbConn);
                     select.Parameters.AddWithValue("@" + Schema.Character.Field.Name, name);
-                    SqliteDataReader reader = select.ExecuteReader();
-                    if(!reader.Read()) throw new DatabaseException("Character " + name + " not found");
-                    return sanitizeCharacter(reader);
+                    SqliteDataAdapter adapter = new SqliteDataAdapter(select);
+                    adapter.Fill(table);
+                    if(table.Rows.Count == 0) throw new SelectException("Character " + name + " not found");
+
+                    return table;
                 }
             }
             catch (SqliteException e)
