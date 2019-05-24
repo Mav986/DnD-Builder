@@ -63,7 +63,6 @@ namespace DnDBuilderLinux.Handlers
                 {
                     JObject json = (JObject) token;
                     SanitizeJson(ref json);
-                    ValidateJson(ref json);
 
                     JObject minified = CreateMinifiedJson(json);
                     minDetailsArray.Add(minified);
@@ -91,7 +90,6 @@ namespace DnDBuilderLinux.Handlers
                 JArray array = JArray.FromObject(selectedChar);
                 JObject json = JObject.FromObject(array[0]);
                 SanitizeJson(ref json);
-                ValidateJson(ref json);
 
                 return AddCalculatedAttributes(json);
             }
@@ -114,6 +112,11 @@ namespace DnDBuilderLinux.Handlers
         {
             try
             {
+                JObject validationCopy = (JObject) json.DeepClone();
+                SanitizeJson(ref validationCopy);
+                CleanJson(ref validationCopy);
+                ValidateJson(ref validationCopy);
+                
                 string name = (string) json[Schema.Character.Field.Name];
                 json.Remove(Schema.Character.Field.Name);
                 Dictionary<string, string> propertyDict = GeneratePropertyDict(json);
@@ -122,7 +125,7 @@ namespace DnDBuilderLinux.Handlers
             }
             catch (DatabaseException e)
             {
-                throw new CharacterException("Error updating character in DnDBuilder.", e);
+                throw new CharacterException("Internal error while updating character.", e);
             }
         }
 
@@ -203,37 +206,6 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Convert database reader results into a character object
-        /// </summary>
-        /// <param name="reader">A database reader holding results</param>
-        /// <returns>A character object</returns>
-        private static Character SanitizeCharacter(IDataRecord reader)
-        {
-            string name = reader[Schema.Character.Field.Name] as string;
-            string gender = reader[Schema.Character.Field.Gender] as string;
-            string bio = reader[Schema.Character.Field.Bio] as string;
-            string race = reader[Schema.Character.Field.Race] as string;
-            string classType = reader[Schema.Character.Field.Class] as string;
-
-            return new Character
-            {
-                Name = string.IsNullOrEmpty(name) ? "" : HttpUtility.JavaScriptStringEncode(name),
-                Gender = string.IsNullOrEmpty(gender) ? "" : HttpUtility.JavaScriptStringEncode(gender),
-                Biography = string.IsNullOrEmpty(bio) ? "" : HttpUtility.JavaScriptStringEncode(bio),
-                Race = string.IsNullOrEmpty(race) ? "" : HttpUtility.JavaScriptStringEncode(race),
-                Class = string.IsNullOrEmpty(classType) ? "" : HttpUtility.JavaScriptStringEncode(classType),
-                Age = reader[Schema.Character.Field.Age] as long? ?? 0,
-                Level = reader[Schema.Character.Field.Level] as long? ?? 0,
-                Con = reader[Schema.Character.Field.Constitution] as long? ?? 0,
-                Dex = reader[Schema.Character.Field.Dexterity] as long? ?? 0,
-                Str = reader[Schema.Character.Field.Strength] as long? ?? 0,
-                Cha = reader[Schema.Character.Field.Charisma] as long? ?? 0,
-                Intel = reader[Schema.Character.Field.Intelligence] as long? ?? 0,
-                Wis = reader[Schema.Character.Field.Wisdom] as long? ?? 0
-            };
-        }
-
-        /// <summary>
         ///     Create a Character object from JSON
         /// </summary>
         /// <param name="json">A JSON object containing character data</param>
@@ -273,12 +245,15 @@ namespace DnDBuilderLinux.Handlers
         /// <param name="json">The JObject to clean</param>
         private void CleanJson(ref JObject json)
         {
+            string defaultRace = _dndHandler.GetAllRaces()[0].ToString();
+            string defaultClass = _dndHandler.GetAllClasses()[0].ToString();
+            
             // 'variable ?? value' syntax is shorthand for "If variable is null, set it to value"
             json["name"] = json["name"] ?? "";
             json["gender"] = json["gender"] ?? "";
             json["bio"] = json["bio"] ?? "";
-            json["race"] = json["race"] ?? "";
-            json["class"] = json["class"] ?? "";
+            json["race"] = json["race"] ?? defaultRace;
+            json["class"] = json["class"] ?? defaultClass;
             json["age"] = json["age"] ?? 0;
             json["level"] = json["level"] ?? 1;
             json["con"] = json["con"] ?? 0;
@@ -297,35 +272,42 @@ namespace DnDBuilderLinux.Handlers
         private void ValidateJson(ref JObject json)
         {
             const int maxAbilityScores = 20;
+
+            try
+            {
+                string name = json["name"].ToString();
+                long age = (long) json["age"];
+                string bio = json["bio"].ToString();
+                long level = (long) json["level"];
+                string race = json["race"].ToString();
+                string classType = json["class"].ToString();
+                long con = (long) json["con"];
+                long dex = (long) json["dex"];
+                long str = (long) json["str"];
+                long cha = (long) json["cha"];
+                long intel = (long) json["intel"];
+                long wis = (long) json["wis"];
+                long attributeTotal = con + dex + str + cha + intel + wis;
             
-            string name = json["name"].ToString();
-            long age = (long) json["age"];
-            string bio = json["bio"].ToString();
-            long level = (long) json["level"];
-            string race = json["race"].ToString();
-            string classType = json["class"].ToString();
-            long con = (long) json["con"];
-            long dex = (long) json["dex"];
-            long str = (long) json["str"];
-            long cha = (long) json["cha"];
-            long intel = (long) json["intel"];
-            long wis = (long) json["wis"];
-            long attributeTotal = con + dex + str + cha + intel + wis;
+                JArray allRaces = _dndHandler.GetAllRaces();
+                JArray allClasses = _dndHandler.GetAllClasses();
             
-            JArray allRaces = _dndHandler.GetAllRaces();
-            JArray allClasses = _dndHandler.GetAllClasses();
+                bool racesValid = allRaces.Any(x => string.Equals(x.Value<string>(), race, StringComparison.OrdinalIgnoreCase));
+                bool classesValid = allClasses.Any(x => string.Equals(x.Value<string>(), classType, StringComparison.OrdinalIgnoreCase));
             
-            bool racesValid = allRaces.Any(x => string.Equals(x.Value<string>(), race, StringComparison.OrdinalIgnoreCase));
-            bool classesValid = allClasses.Any(x => string.Equals(x.Value<string>(), classType, StringComparison.OrdinalIgnoreCase));
-            
-            if (name.Length < 1) throw new CharacterException("Character name is required.");
-            if (age < 0 || age > 500) throw new CharacterException("Age must be between 0 and 500.");
-            if (bio.Length > 500) throw new CharacterException("Biography must not exceed 500 characters.");
-            if (level < 1 || level > 20) throw new CharacterException("Level must be between 1 and 20.");
-            if (!racesValid) throw new CharacterException("Invalid race.");
-            if (!classesValid) throw new CharacterException("Invalid class.");
-            if(attributeTotal != maxAbilityScores) 
-                throw new CharacterException($"Invalid attribute scores, total points must equal {maxAbilityScores}.");
+                if (name.Length < 1) throw new CharacterException("Character name is required.");
+                if (age < 0 || age > 500) throw new CharacterException("Age must be between 0 and 500.");
+                if (bio.Length > 500) throw new CharacterException("Biography must not exceed 500 characters.");
+                if (level < 1 || level > 20) throw new CharacterException("Level must be between 1 and 20.");
+                if (!racesValid) throw new CharacterException("Invalid race.");
+                if (!classesValid) throw new CharacterException("Invalid class.");
+                if(attributeTotal != maxAbilityScores) 
+                    throw new CharacterException($"Invalid attribute scores, total points must equal {maxAbilityScores}.");
+            }
+            catch (FormatException e)
+            {
+                throw new CharacterException("Character data format invalid.", e);
+            }
         }
 
         /// <summary>
