@@ -44,22 +44,19 @@ namespace DnDBuilderLinux.Database
         /// </summary>
         /// <returns>An enumerable containing all Characters</returns>
         /// <exception cref="DatabaseException"></exception>
-        public IEnumerable<Character> SelectAllCharacters(Func<IDataRecord, Character> sanitizeCallback)
+        public DataTable SelectAllCharacters()
         {
             try
             {
-                List<Character> charList = new List<Character>();
+                DataTable table = new DataTable();
                 using (SqliteConnection dbConn = GetConnection())
                 {
                     SqliteCommand cmd = new SqliteCommand(Schema.Character.Query.SelectAll, dbConn);
-                    SqliteDataReader reader = cmd.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        charList.Add(sanitizeCallback(reader));
-                    }
+                    SqliteDataAdapter adapter = new SqliteDataAdapter(cmd);
+                    adapter.Fill(table);
                 }
 
-                return charList;
+                return table;
             }
             catch (SqliteException e)
             {

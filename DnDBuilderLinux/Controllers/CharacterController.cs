@@ -51,11 +51,13 @@ namespace DnDBuilderLinux.Controllers
         /// <exception cref="HttpResponseException"></exception>
         [HttpGet]
         [Route("view/all")]
-        public JArray GetAllCharacters()
+        public HttpResponseMessage GetAllCharacters()
         {
             try
             {
-                return _charHandler.GetAllCharacters();
+                JArray characters = _charHandler.GetAllCharacters();
+                return Request.CreateResponse(HttpStatusCode.OK, characters);
+
             }
             catch (CharacterException e)
             {

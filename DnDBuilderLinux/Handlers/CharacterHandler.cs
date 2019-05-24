@@ -7,6 +7,7 @@ using System.Web;
 using System.Xml.Serialization;
 using DnDBuilderLinux.Database;
 using DnDBuilderLinux.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace DnDBuilderLinux.Handlers
@@ -41,7 +42,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     CachedGet all characters currently stored in DnDBuilder
+        ///     Get all characters currently stored in DnDBuilder
         /// </summary>
         /// <returns>A JArray containing all character's details</returns>
         /// <exception cref="CharacterException"></exception>
@@ -49,27 +50,42 @@ namespace DnDBuilderLinux.Handlers
         {
             try
             {
-                JArray jsonList = new JArray();
+                DataTable characterTable = _db.SelectAllCharacters();
+                JArray fullDetailsArray = JArray.FromObject(characterTable);
+                JArray minDetailsArray = new JArray();
 
-                foreach (Character character in _db.SelectAllCharacters(SanitizeCharacter))
+                foreach (JToken token in fullDetailsArray)
                 {
-                    JObject charDetails = new JObject
-                    {
-                        [Schema.Character.Field.Name] = character.Name,
-                        [Schema.Character.Field.Race] = character.Race,
-                        [Schema.Character.Field.Class] = character.Class,
-                        [Schema.Character.Field.Level] = character.Level
-                    };
+                    JObject json = (JObject) token;
+                    SanitizeJson(ref json);
+                    ValidateJson(ref json);
 
-                    jsonList.Add(charDetails);
+                    JObject minified = CreateMinifiedJson(json);
+                    minDetailsArray.Add(minified);
                 }
 
-                return jsonList;
+                return minDetailsArray;
             }
             catch (DatabaseException e)
             {
                 throw new CharacterException("Error retreiving characters from DnDBuilder.", e);
             }
+        }
+
+        /// <summary>
+        ///     Create a minified JSON containing only the name, race, class, and level of the character
+        /// </summary>
+        /// <param name="json">JObject to minify</param>
+        /// <returns>A JObject with only the summarized attributes</returns>
+        private JObject CreateMinifiedJson(JObject json)
+        {
+            return new JObject
+            {
+                ["name"] = json["name"],
+                ["race"] = json["race"],
+                ["class"] = json["class"],
+                ["level"] = json["level"]
+            };
         }
 
         /// <summary>
