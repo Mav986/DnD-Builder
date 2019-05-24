@@ -6,6 +6,8 @@ using System.Linq;
 using System.Web;
 using System.Xml.Serialization;
 using DnDBuilderLinux.Database;
+using DnDBuilderLinux.Database.Exceptions;
+using DnDBuilderLinux.Handlers.Exceptions;
 using DnDBuilderLinux.Models;
 using Newtonsoft.Json.Linq;
 

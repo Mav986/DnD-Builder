@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Web.Http;
 using DnDBuilderLinux.Database;
 using DnDBuilderLinux.Handlers;
+using DnDBuilderLinux.Handlers.Exceptions;
 using Newtonsoft.Json.Linq;
 
 namespace DnDBuilderLinux.Controllers

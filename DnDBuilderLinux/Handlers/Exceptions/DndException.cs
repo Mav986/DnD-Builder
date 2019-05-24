@@ -1,6 +1,6 @@
 using System;
 
-namespace DnDBuilderLinux.Handlers
+namespace DnDBuilderLinux.Handlers.Exceptions
 {
     public class DndException : Exception
     {

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Web;
+using DnDBuilderLinux.Handlers.Exceptions;
 using DnDBuilderLinux.Web;
 using Newtonsoft.Json.Linq;
 
