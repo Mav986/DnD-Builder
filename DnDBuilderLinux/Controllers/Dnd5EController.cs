@@ -23,7 +23,7 @@ namespace DnDBuilderLinux.Controllers
         }
 
         /// <summary>
-        ///     Get the names and DnD5eapi urls for all races
+        ///     Get the names for all races
         /// </summary>
         /// <returns>
         ///     200 OK if races were retrieved
@@ -47,7 +47,7 @@ namespace DnDBuilderLinux.Controllers
         }
 
         /// <summary>
-        ///     Get the names and DnD5eapi urls for all races
+        ///     Get the names for all races
         /// </summary>
         /// <returns>
         ///    200 OK if all classes were retrieved
