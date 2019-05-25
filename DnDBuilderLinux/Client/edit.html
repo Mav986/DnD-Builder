@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title></title>
 </head>
-<body onload="InitEditCharacter()">
+<body onload="initEditCharacterPage()">
 <div>
     <script src="nav.js"></script><br><br>
 </div>
 <form id="submissionForm">
 
     Name: <input required name="name" id="nameInput" type="text" disabled>
-    Race: <select required name="race" id="raceSelect"></select>
-    Class: <select required name="class" id="classSelect" onchange="GetSpellcaster()"></select>
+    Race: <select required name="race" id="allRaces"></select>
+    Class: <select required name="class" id="allClasses" onchange="getSpellcaster()"></select>
     <br>
     <br>
     Gender: <input name="gender" id="genderInput" type="text" maxlength="15">
@@ -24,19 +24,20 @@
     Ability Scores - Total points remaining: <div id="abilityScoreRem" style="display: inline">20</div>
     <br>
     <br>
-    Con: <input name="con" id="conInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
-    Dex: <input name="dex" id="dexInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
-    Str: <input name="str" id="strInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
+    Con: <input name="con" id="conInput" type="number" min="0" value="0" onchange="updateScoreRemaining()">
+    Dex: <input name="dex" id="dexInput" type="number" min="0" value="0" onchange="updateScoreRemaining()">
+    Str: <input name="str" id="strInput" type="number" min="0" value="0" onchange="updateScoreRemaining()">
     <br>
-    Cha: <input name="cha" id="chaInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
-    Int: <input name="intel" id="intInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
-    Wis: <input name="wis" id="wisInput" type="number" min="0" value="0" onchange="UpdateAttributesRemaining()">
+    Cha: <input name="cha" id="chaInput" type="number" min="0" value="0" onchange="updateScoreRemaining()">
+    Int: <input name="intel" id="intInput" type="number" min="0" value="0" onchange="updateScoreRemaining()">
+    Wis: <input name="wis" id="wisInput" type="number" min="0" value="0" onchange="updateScoreRemaining()">
     <br>
     <br>
     Biography<br><textarea name="bio" rows="10" cols="70" maxlength="500"></textarea>
     <br>
+    
 </form>
-<button id="updateBtn" onclick="SaveCharacter()">Update</button>
-<button id="deleteCharBtn" onclick="DeleteCharacter()">Delete</button>
+<button id="updateBtn" onclick="updateCharacter()">Update</button>
+<button id="deleteCharBtn" onclick="deleteCharacter()">Delete</button>
 </body>
 </html>

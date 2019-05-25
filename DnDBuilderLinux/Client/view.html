@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>View Character</title>
+    <title>Character List</title>
     <script src="index.js"></script>
 </head>
-<body onload="InitViewCharacters()">
+<body onload="initViewCharacterPage()">
 <div>
     <script src="nav.js"></script><br><br>
 </div>
-    Character: <select name="selectCharacter" id="selectBox" onchange="StoreSelectedCharacter()"></select>
-    <button id="getCharBtn" onclick="LoadPage('/Client/edit.html')">View</button>
-    <button id="downloadChar" onclick="DownloadCharacter()">Download</button>
+    Character: <select name="selectCharacter" id="charList" onchange="loadSelected()"></select>
+    <button id="getCharBtn" onclick="loadPage('/Client/edit.html')">View</button>
+    <button id="downloadChar" onclick="downloadCharacter()">Download</button>
 </body>
 </html>
