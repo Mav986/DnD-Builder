@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>DnDBuilderLinux</RootNamespace>
     <AssemblyName>DnDBuilderLinux</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -62,10 +62,11 @@
   <ItemGroup>
     <Content Include="Client\create.html" />
     <Content Include="Client\edit.html" />
-    <Content Include="Client\index.html" />
+    <Content Include="Client\form.js" />
     <Content Include="Client\index.js" />
     <Content Include="Client\nav.js" />
     <Content Include="Client\view.html" />
+    <Content Include="index.html" />
     <Content Include="Web.config" />
     <Content Include="Global.asax" />
     <Content Include="packages.config" />
@@ -73,25 +74,22 @@
   <ItemGroup>
     <Compile Include="Controllers\CharacterController.cs" />
     <Compile Include="Controllers\Dnd5EController.cs" />
-    <Compile Include="Database\DatabaseException.cs" />
     <Compile Include="Database\DatabaseHandler.cs" />
-    <Compile Include="Database\InsertException.cs" />
     <Compile Include="Database\Schema.cs" />
-    <Compile Include="Database\SelectException.cs" />
+    <Compile Include="Exceptions\CharacterException.cs" />
+    <Compile Include="Exceptions\DatabaseException.cs" />
+    <Compile Include="Exceptions\DndException.cs" />
+    <Compile Include="Exceptions\DuplicateKeyException.cs" />
+    <Compile Include="Exceptions\NotFoundException.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Handlers\CharacterHandler.cs" />
     <Compile Include="Handlers\Dnd5eHandler.cs" />
-    <Compile Include="Handlers\Exceptions\CharacterException.cs" />
-    <Compile Include="Handlers\Exceptions\DndException.cs" />
     <Compile Include="Models\Character.cs" />
     <Compile Include="Web\CacheHandler.cs" />
     <Compile Include="Web\RequestHandler.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Database\Exceptions" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

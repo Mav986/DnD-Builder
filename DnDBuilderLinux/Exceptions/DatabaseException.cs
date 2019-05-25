@@ -1,6 +1,6 @@
 using System;
 
-namespace DnDBuilderLinux.Database
+namespace DnDBuilderLinux.Exceptions
 {
     public class DatabaseException: Exception
     {

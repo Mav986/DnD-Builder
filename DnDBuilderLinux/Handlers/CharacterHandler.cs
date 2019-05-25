@@ -6,8 +6,7 @@ using System.Linq;
 using System.Web;
 using System.Xml.Serialization;
 using DnDBuilderLinux.Database;
-using DnDBuilderLinux.Database.Exceptions;
-using DnDBuilderLinux.Handlers.Exceptions;
+using DnDBuilderLinux.Exceptions;
 using DnDBuilderLinux.Models;
 using Newtonsoft.Json.Linq;
 
@@ -18,9 +17,9 @@ namespace DnDBuilderLinux.Handlers
         private readonly DatabaseHandler _db;
         private readonly Dnd5EHandler _dndHandler;
         
-        public CharacterHandler(DatabaseHandler db)
+        public CharacterHandler()
         {
-            _db = db;
+            _db = new DatabaseHandler();
             _dndHandler = new Dnd5EHandler();
         }
         
@@ -36,7 +35,7 @@ namespace DnDBuilderLinux.Handlers
                 Character newChar = CreateCharacter(character);
                 _db.InsertCharacter(newChar);
             }
-            catch (InsertException e)
+            catch (DuplicateKeyException e)
             {
                 throw new CharacterException(e.Message, e);
             }
@@ -47,7 +46,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Get all characters currently stored in DnDBuilder
+        ///     get all characters currently stored in DnDBuilder
         /// </summary>
         /// <returns>A JArray containing JObjects, each of which has a small summary of each character</returns>
         /// <exception cref="CharacterException"></exception>
@@ -77,7 +76,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Get a single character from within DnDBuilder
+        ///     get a single character from within DnDBuilder
         /// </summary>
         /// <param name="name">Name of the character to retreive</param>
         /// <returns>A JObject containing the specified character's details</returns>
@@ -93,10 +92,6 @@ namespace DnDBuilderLinux.Handlers
 
                 return AddCalculatedAttributes(json);
             }
-            catch (SelectException e)
-            {
-                throw new CharacterException(e.Message, e);
-            }
             catch (DatabaseException e)
             {
                 throw new CharacterException("Internal error while retrieving character.", e);
@@ -108,7 +103,7 @@ namespace DnDBuilderLinux.Handlers
         /// </summary>
         /// <param name="json">A JObject containing a character's name and the details to be updated</param>
         /// <exception cref="CharacterException"></exception>
-        public void UpdateCharacter(JObject json)
+        public JObject UpdateCharacter(JObject json)
         {
             try
             {
@@ -122,6 +117,8 @@ namespace DnDBuilderLinux.Handlers
                 Dictionary<string, string> propertyDict = GeneratePropertyDict(json);
                 
                 _db.UpdateCharacter(name, propertyDict);
+
+                return GetCharacter(name);
             }
             catch (DatabaseException e)
             {
@@ -130,7 +127,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     Delete a single character from DnDBuilder
+        ///     deleteReq a single character from DnDBuilder
         /// </summary>
         /// <param name="name">Name of character to delete</param>
         /// <exception cref="CharacterException"></exception>

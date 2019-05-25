@@ -11,15 +11,14 @@ ValidationError.prototype = Error.prototype;
  * Load the specified client page
  */
 async function loadPage(path){
-    const domain = 'http://localhost:5000';
-    location.href = domain + path;
+    location.href = path;
 }
 
 /*
  * get an XHR object to send a 'type' request to the endpoint
  */
 async function getHttpRequestObject(type, endpoint, async=true){
-    let base_url = 'http://localhost:5000/';
+    let base_url = window.location.protocol + '//' + window.location.host + '/';
     let req = new XMLHttpRequest();
     req.open(type, base_url + endpoint, async);
 
@@ -127,25 +126,21 @@ async function deleteReq(name){
 async function initCreateCharacterPage(){
     document.getElementById(await formKey()).reset();
 
-    await loadSelects();
+    await Promise.all([ updateRaceList(), updateClassList() ]);
     await getSpellcaster();
 }
 
 /*
  * Initialize the edit character page
  */
-async function initEditCharacterPage(){
+async function initEditCharacterPage(){    
     await initCreateCharacterPage();
-    let charSelected = await getFromCache(await selectedCharNameKey());
-    document.title = charSelected;
-
-    if(charSelected !== null){
-        console.log(charSelected);
-        await cacheCharacterDataFor(charSelected);
-        let charData = await getFromCache(await charDataKey(charSelected));
-
-        charData = JSON.parse(charData);
-        await loadFormWith(charData);
+    
+    let characterName = await getFromCache(await selectedKey());
+    if(characterName !== null) {
+        document.title = 'Editing: ' + characterName;
+        await loadCharacterData(characterName);
+        await loadForm(await charDataKey(characterName));
     }
     else{
         await loadPage('/Client/view.html');
@@ -156,10 +151,8 @@ async function initEditCharacterPage(){
  * Initialize the view characters page
  */
 async function initViewCharacterPage(){
-    let listJson = await getReq('character/view/all');
-
-    await populateSelectFromArray(await charListKey(), listJson, createCharacterOption);
-    await loadSelected();
+    await updateCharacterList();
+    await storeSelectedCharacter();
 }
 
 /*
@@ -180,6 +173,19 @@ async function createCharacter(){
 }
 
 /*
+ * Load the edit character page
+ */
+async function editCharacter(){
+    let selectedCharacter = await getFromCache(await selectedKey());
+    if(selectedCharacter !== null){
+        await loadPage('/Client/edit.html')
+    }
+    else {
+        await promptNoSavedCharacter();
+    }
+}
+
+/*
  * Save a character's details
  */
 async function updateCharacter(){
@@ -187,12 +193,12 @@ async function updateCharacter(){
         await validateForm();
         let json = await convertFormToJson();
         let path = 'character/update';
-
-        console.log("Sending update request...");
         let response = await putReq(path, json);
         let name = response['name'];
-        await storeInCache(await charDataKey(name), JSON.stringify(response));
-        await loadFormWith(response);
+        let key = await charDataKey(name);
+        
+        await storeInCache(key, JSON.stringify(response));
+        await loadForm(key);
         alert("Character successfully updated");
     }
     catch(e){
@@ -209,12 +215,11 @@ async function deleteCharacter(){
     let confirmed = confirm("Are you sure you want to delete this character?");
 
     if(confirmed){
-        let characterName = await getFromCache(await selectedCharNameKey());
-        await deleteReq(characterName).then(async () => {
-            console.log("attempting to load page");
-            await loadPage('/Client/view.html');
-            console.log("page loaded...");
-        });
+        let characterName = await getFromCache(await selectedKey());
+        await deleteReq(characterName);
+        await removeFromCache(await selectedKey());
+        console.log('cache entry cleared..');
+        await loadPage('/Client/view.html');
     }
 }
 
@@ -222,23 +227,76 @@ async function deleteCharacter(){
  * Download XML from server for selected character
  */
 async function downloadCharacter(){
-    let characterName = await getFromCache(await selectedCharNameKey());
-    let path = '/character/xml/' + characterName;
-    await loadPage(path);
+    let characterName = await getFromCache(await selectedKey());
+    if(characterName !== null){
+        let path = '/character/xml/' + characterName;
+        await loadPage(path);
+    }
+    else{
+        await promptNoSavedCharacter();
+    }
 }
 
 /*
- * Populate a select box with data from json or string array
+ * Create a character option text for a select box
  */
-async function populateSelectFromArray(selectName, data, generateStringCallback){
-    try {
-        let selectBox = document.getElementById(selectName);
+async function getCharacterSummaries(json){
 
+    let jsonArray = [];
+    for(let entry of json) {
+
+        let name = entry['name'] != null ? entry['name'] : entry;
+        let race = entry['race'] != null ? entry['race'] : entry;
+        let classType = entry['class'] != null ? entry['class'] : entry;
+        let level = entry['level'] != null ? entry['level'] : entry;
+
+        jsonArray.push(name + " : " + race + " : " + classType + " : " + level);
+    }
+
+    return jsonArray;
+}
+
+/*
+ * Update the character list from the api
+ */
+async function updateCharacterList(){
+    let listJson = await getReq('character/view/all');
+
+    if(listJson !== null){
+        let summaryArray = await getCharacterSummaries(listJson);
+        let summaryList = document.getElementById(await charListKey());
+
+        await populateListFromArray(summaryList, summaryArray);
+    }
+}
+
+/*
+ * Load list of races
+ */
+async function updateRaceList(){
+    let raceData = loadRaceData();
+    let raceList = document.getElementById(await raceListKey());
+    await populateListFromArray(raceList, await raceData);
+}
+
+/*
+ * Load list of classes
+ */
+async function updateClassList(){
+    let classData = loadClassData();
+    let classList = document.getElementById(await classListKey());
+    await populateListFromArray(classList, await classData)
+}
+
+/*
+ * Populate a select list with data from a string array
+ */
+async function populateListFromArray(list, data){
+    try {
         for (let ii = 0; ii < data.length; ii++) {
-            let selectString = await generateStringCallback(data[ii]);
-            selectBox.options[ii] = new Option(selectString);
+            list.options[ii] = new Option(data[ii]);
         }
-        selectBox.selectedIndex = 0;
+        list.selectedIndex = 0;
     }
     catch (e) {
         console.log(data);
@@ -246,36 +304,36 @@ async function populateSelectFromArray(selectName, data, generateStringCallback)
 }
 
 /*
- * Set the selected element in a select box to character's class
+ * Set the selected option in a select box based on option text
  */
-async function setSelected(element, charData){
-    for(let option of element.options) {
-        if (option.text.toLowerCase() === charData[element.name].toLowerCase())
+async function setSelectedOption(select, key){
+    for(let option of select.options) {
+        if (option.text.toLowerCase() === key.toLowerCase()) {
             option.selected = true;
+            return;
+        }
     }
 }
 
 /*
- * Load race and class select boxes
+ * Store selected character in cache
  */
-async function loadSelects(){
-    let races = await loadRaceData();
-    let classes = await loadClassData();
-    let raceKey = await raceListKey();
-    let classKey = await classListKey();
+async function storeSelectedCharacter(){
+    let charSelect = document.getElementById(await charListKey());
+    let characterEntry = charSelect.options[charSelect.selectedIndex].value;
+    let characterEntryArray = characterEntry.split(":");
+    let characterName = characterEntryArray[0];
 
-    let racePop = populateSelectFromArray(raceKey, races, createRaceOrClassOption);
-    let classPop = populateSelectFromArray(classKey, classes, createRaceOrClassOption);
-
-    await Promise.all([racePop, classPop]);
+    await storeInCache(await selectedKey(), characterName);
+    await loadCharacterData(characterName);
 }
 
 /*
  * Update the text indicating remaining ability score points
  */
-async function updateScoreRemaining(){
+async function updateRemainingScore(){
     
-    let abilityList = await getScoreList();
+    let abilityList = await getScoreArray();
     
     let total = 0;
     let remaining = 0;
@@ -303,7 +361,7 @@ async function updateScoreRemaining(){
 /*
  * get a list of ability scores
  */
-async function getScoreList(){
+async function getScoreArray(){
 
     let abilityList = [];
 
@@ -322,28 +380,22 @@ async function getScoreList(){
  */
 async function getSpellcaster(){
     let classType = document.getElementById(await classListKey()).value;
-    let caster = await getFromCache(await isCasterKey(classType));
-    let isCaster = JSON.parse(caster);
-    
-    if(isCaster === null){
-        isCaster = await getReq('dnd/spellcaster/' + classType);
-        await storeInCache(await isCasterKey(classType), JSON.stringify(isCaster));
-    }
+    let isCaster = await getReq('dnd/spellcaster/' + classType);
     
     document.getElementById(await spellInputKey()).value = isCaster ? 'Yes' : 'No';
 }
 
 /*
- * Store selected character in cache
+ * Load character data into the cache
  */
-async function loadSelected(){
-    let charSelect = document.getElementById(await charListKey());
-    let characterEntry = charSelect.options[charSelect.selectedIndex].value;
-    let characterEntryArray = characterEntry.split(":");
-    let characterName = characterEntryArray[0];
+async function loadCharacterData(characterName){
+    let charData = await getFromCache(await charDataKey(characterName));
+    if(!charData){
+        let path = 'character/view/' + characterName;
+        let json = await getReq(path);
+        await storeInCache(await charDataKey(characterName), JSON.stringify(json));
+    }
 
-    await storeInCache(await selectedCharNameKey(), characterName);
-    await cacheCharacterDataFor(characterName);
 }
 
 /*
@@ -351,11 +403,11 @@ async function loadSelected(){
  */
 async function loadRaceData(){
     let races;
-    let racesString = await getFromCache(await allRacesKey());
+    let racesString = await getFromCache(await raceListKey());
     
     if(racesString === null) {
         races = await getReq('dnd/races');
-        await storeInCache(await allRacesKey(), JSON.stringify(races));
+        await storeInCache(await raceListKey(), JSON.stringify(races));
     }
     else{
         races = JSON.parse(racesString);
@@ -369,17 +421,36 @@ async function loadRaceData(){
  */
 async function loadClassData(){
     let classes;
-    let classesString = await getFromCache(await allClassesKey());
+    let classesString = await getFromCache(await classListKey());
     
     if(classesString === null) {
         classes = await getReq('dnd/classes');
-        await storeInCache(await allClassesKey(), JSON.stringify(classes));
+        await storeInCache(await classListKey(), JSON.stringify(classes));
     }
     else{
         classes = JSON.parse(classesString);
     }
     
     return classes;
+}
+
+/*
+ * Load form with data from json
+ */
+async function loadForm(key){
+    let charData = await getFromCache(key);
+    charData = JSON.parse(charData);
+    let form = document.getElementById(await formKey());
+    for(let element of form.elements){
+        if(charData[element.name] != null){
+            if(element.type === selectBoxType()){
+                await setSelectedOption(element, charData[element.name]);
+            }
+            else{
+                element.value = charData[element.name];
+            }
+        }
+    }
 }
 
 /*
@@ -423,7 +494,7 @@ async function validateForm() {
     // Ability scores are valid if they're integers and add up to 20
     async function validateScores() {
         const required = 20;
-        let abilityList = await getScoreList();
+        let abilityList = await getScoreArray();
         let total = 0;
 
         for(let score of abilityList){
@@ -445,17 +516,14 @@ async function validateForm() {
 }
 
 /*
- * Modified from https://stackoverflow.com/a/21209563
- * User: jholster
- * 
- * Convert form data to json object
+ * Add form values to a JSON object
  */
 async function convertFormToJson(){
     let form = document.getElementById('submissionForm');
     let json = {};
 
     for(let element of form.elements){
-        if(element.name){
+        if(element.id !== 'hpInput' || element.id !== 'spellInput'){
             json[element.name] = element.value;
         }
     }
@@ -464,43 +532,14 @@ async function convertFormToJson(){
 }
 
 /*
- * Load form with data from json
+ * A shared error prompt
  */
-async function loadFormWith(charData){
-    let form = document.getElementById(await formKey());
-    for(let element of form.elements){
-        if(charData[element.name] != null){
-            if(element.type === selectBoxType()){
-                await setSelected(element, charData);
-            }
-            else{
-                element.value = charData[element.name];
-            }
-        }
-    }
+async function promptNoSavedCharacter(){
+    alert("No saved characters. Create a character and try again.");
 }
 
 /*
- * Create a race/class option text for a select box
- */
-async function createRaceOrClassOption(json){
-    return json;
-}
-
-/*
- * Create a character option text for a select box
- */
-async function createCharacterOption(json){
-    let name = json['name'] != null ? json['name'] : json;
-    let race = json['race'] != null ? json['race'] : json;
-    let classType = json['class'] != null ? json['class'] : json;
-    let level = json['level'] != null ? json['level'] : json;
-
-    return name + " : " + race + " : " + classType + " : " + level;
-}
-
-/*
- * Store and retrieve from cache
+ * Access the cache cache
  */
 async function storeInCache(key, value){
     sessionStorage.setItem(key.trim(), value.trim());
@@ -510,38 +549,13 @@ async function getFromCache(key){
     return sessionStorage.getItem(key.trim());
 }
 
-async function cacheCharacterDataFor(characterName, overwrite=false){
-    let charData;
-
-    console.log("overwrite == " + overwrite);
-    if(overwrite === false){
-        console.log("retrieving data for " + characterName + " from cache...");
-        charData = await getFromCache(await charDataKey(characterName));
-    }
-
-    if(!charData){
-        console.log("retrieving data for " + characterName + " from api...");
-        let path = 'character/view/' + characterName;
-        await getReq(path).then(async (result) => {
-            console.log("storing data for " + characterName + " in the cache...");
-            await storeInCache(await charDataKey(characterName), JSON.stringify(result));
-        }).catch(error => {
-            console.log(error.message);
-        });
-    }
-
+async function removeFromCache(key){
+    sessionStorage.removeItem(key)
 }
 
 /*
  * Faux constants
  */
-async function allRacesKey(){
-    return 'allRaces';
-}
-
-async function allClassesKey(){
-    return 'allClasses';
-}
 
 async function formKey(){
     return 'submissionForm';
@@ -563,16 +577,12 @@ async function classListKey(){
     return 'allClasses';
 }
 
-async function selectedCharNameKey(){
+async function selectedKey(){
     return 'selected';
 }
 
 async function charDataKey(characterName){
     return characterName.trim() + 'Data';
-}
-
-async function isCasterKey(classType) {
-    return classType.trim() + '-caster';
 }
 
 async function spellInputKey(){

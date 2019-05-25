@@ -2,41 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Editing: Character</title>
 </head>
 <body onload="initEditCharacterPage()">
 <div>
-    <script src="nav.js"></script><br><br>
+    <script src="nav.js"></script>
 </div>
-<form id="submissionForm">
-
-    Name: <input required name="name" id="nameInput" type="text" disabled>
-    Race: <select required name="race" id="allRaces"></select>
-    Class: <select required name="class" id="allClasses" onchange="getSpellcaster()"></select>
-    <br>
-    <br>
-    Gender: <input name="gender" id="genderInput" type="text" maxlength="15">
-    Age: <input required name="age" id="ageInput" type="number" min="0" max="500" step="1" value="18">
-    Level: <input required name="level" id="levelInput" type="number" min="1" max="20" step="1" value="1">
-    Spellcaster: <input id="spellInput" type="text" disabled>
-    <br>
-    <br>
-    Ability Scores - Total points remaining: <div id="abilityScoreRem" style="display: inline">20</div>
-    <br>
-    <br>
-    Con: <input name="con" id="conInput" type="number" min="0" value="0" onchange="updateScoreRemaining()">
-    Dex: <input name="dex" id="dexInput" type="number" min="0" value="0" onchange="updateScoreRemaining()">
-    Str: <input name="str" id="strInput" type="number" min="0" value="0" onchange="updateScoreRemaining()">
-    <br>
-    Cha: <input name="cha" id="chaInput" type="number" min="0" value="0" onchange="updateScoreRemaining()">
-    Int: <input name="intel" id="intInput" type="number" min="0" value="0" onchange="updateScoreRemaining()">
-    Wis: <input name="wis" id="wisInput" type="number" min="0" value="0" onchange="updateScoreRemaining()">
-    <br>
-    <br>
-    Biography<br><textarea name="bio" rows="10" cols="70" maxlength="500"></textarea>
-    <br>
-    
-</form>
+<div>
+    <script src="form.js"></script>
+    <script>document.getElementById('nameInput').disabled = true;</script>
+</div>
 <button id="updateBtn" onclick="updateCharacter()">Update</button>
 <button id="deleteCharBtn" onclick="deleteCharacter()">Delete</button>
 </body>

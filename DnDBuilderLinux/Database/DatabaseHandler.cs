@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using DnDBuilderLinux.Database.Exceptions;
+using DnDBuilderLinux.Exceptions;
 using DnDBuilderLinux.Models;
 using Mono.Data.Sqlite;
 
@@ -28,7 +28,8 @@ namespace DnDBuilderLinux.Database
             {
                 using (SqliteConnection dbConn = GetConnection())
                 {
-                    if (CheckExists(character.Name)) throw new InsertException("Character already exists.");
+                    if (CheckExists(character.Name)) throw new DuplicateKeyException("Character already exists.");
+                    
                     SqliteCommand insert = new SqliteCommand(Schema.Character.Query.InsertCharacter, dbConn);
                     insert = AddCharacterParams(character, insert);
                     insert.ExecuteNonQuery();
@@ -83,7 +84,7 @@ namespace DnDBuilderLinux.Database
                     select.Parameters.AddWithValue("@" + Schema.Character.Field.Name, name);
                     SqliteDataAdapter adapter = new SqliteDataAdapter(select);
                     adapter.Fill(table);
-                    if(table.Rows.Count == 0) throw new SelectException("Character " + name + " not found");
+                    if(table.Rows.Count == 0) throw new NotFoundException("Character " + name + " not found");
 
                     return table;
                 }
@@ -104,6 +105,8 @@ namespace DnDBuilderLinux.Database
         {
             try
             {
+                if (!CheckExists(name)) throw new NotFoundException("Character not found.");
+                
                 string fieldsEqualTo = GenerateSqlSetString(updatedFields);
                 
                 string updateQuery = "UPDATE " + Schema.Character.Table + " " +
@@ -129,7 +132,7 @@ namespace DnDBuilderLinux.Database
         }
 
         /// <summary>
-        ///     Delete a single character
+        ///     deleteReq a single character
         /// </summary>
         /// <param name="name">Name of the character to be deleted</param>
         /// <exception cref="DatabaseException"></exception>
@@ -139,6 +142,8 @@ namespace DnDBuilderLinux.Database
             {
                 using (SqliteConnection dbConn = GetConnection())
                 {
+                    if (!CheckExists(name)) throw new NotFoundException("Character not found.");
+                    
                     SqliteCommand cmd = new SqliteCommand(Schema.Character.Query.DeleteCharacter, dbConn);
                     cmd.Parameters.AddWithValue("@" + Schema.Character.Field.Name, name);
                     cmd.ExecuteNonQuery();
@@ -188,15 +193,17 @@ namespace DnDBuilderLinux.Database
         private static string SanitizeColumn(string column)
         {
             /*
-             * Find the first constant column name that matches the string 'column'
+             * Find a constant column name that matches the string 'column'
              * This will prevent SQL injection by throwing an exception when the columnName
              * contains anything other than the name of a column.
              */
+
+            if (!Schema.Character.Field.AllFields.Any(x => x.Equals(column, StringComparison.OrdinalIgnoreCase)))
+                throw new DatabaseException("Column " + column + " not found");
+            
             string newColumnName = Schema.Character.Field.AllFields.First(x => x.Equals(column, StringComparison.OrdinalIgnoreCase));
-
-            if (newColumnName == null) throw new DatabaseException("Column " + column + " not found");
-
             return newColumnName;
+
         }
 
         /// <summary>

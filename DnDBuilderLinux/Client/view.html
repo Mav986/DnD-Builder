@@ -7,10 +7,10 @@
 </head>
 <body onload="initViewCharacterPage()">
 <div>
-    <script src="nav.js"></script><br><br>
+    <script src="nav.js"></script>
 </div>
-    Character: <select name="selectCharacter" id="charList" onchange="loadSelected()"></select>
-    <button id="getCharBtn" onclick="loadPage('/Client/edit.html')">View</button>
+    Character: <select name="selectCharacter" id="charList" onchange="storeSelectedCharacter()"></select>
+    <button id="getCharBtn" onclick="editCharacter()">View</button>
     <button id="downloadChar" onclick="downloadCharacter()">Download</button>
 </body>
 </html>
