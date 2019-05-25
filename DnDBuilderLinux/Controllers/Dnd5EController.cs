@@ -23,9 +23,12 @@ namespace DnDBuilderLinux.Controllers
         }
 
         /// <summary>
-        ///     CachedGet the names and DnD5eapi urls for all races
+        ///     Get the names and DnD5eapi urls for all races
         /// </summary>
-        /// <returns>JSON containing all DnD 5e race names</returns>
+        /// <returns>
+        ///     200 OK if races were retrieved
+        ///     500 Internal Server Error otherwise
+        /// </returns>
         [HttpGet]
         [Route("races")]
         public HttpResponseMessage GetRaces()
@@ -44,9 +47,12 @@ namespace DnDBuilderLinux.Controllers
         }
 
         /// <summary>
-        ///     CachedGet the names and DnD5eapi urls for all races
+        ///     Get the names and DnD5eapi urls for all races
         /// </summary>
-        /// <returns>JSON containing all DnD 5e class names and urls</returns>
+        /// <returns>
+        ///    200 OK if all classes were retrieved
+        ///    500 Internal Server Error otherwise
+        /// </returns>
         [HttpGet]
         [Route("classes")]
         public HttpResponseMessage GetClasses()
@@ -68,7 +74,10 @@ namespace DnDBuilderLinux.Controllers
         ///     get a boolean value indicating whether the class is a caster or not
         /// </summary>
         /// <param name="classType">A valid DND 5E class</param>
-        /// <returns>true if the class is a caster, false otherwise</returns>
+        /// <returns>
+        ///    200 OK if spellcaster was calculated
+        ///    400 Bad Request otherwise
+        /// </returns>
         [HttpGet]
         [Route("spellcaster/{classType}")]
         public HttpResponseMessage GetSpellcaster(string classType)
