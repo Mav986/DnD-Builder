@@ -19,8 +19,8 @@ namespace DnDBuilderLinux.Handlers
         
         public CharacterHandler()
         {
-            _db = new DatabaseHandler();
             _dndHandler = new Dnd5EHandler();
+            _db = new DatabaseHandler();
         }
         
         /// <summary>

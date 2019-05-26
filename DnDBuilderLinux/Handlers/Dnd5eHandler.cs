@@ -21,7 +21,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     CachedGet all race names
+        ///     Get all race names
         /// </summary>
         /// <returns>JSON array containing the official 5e race names</returns>
         public JArray GetAllRaces()
@@ -37,7 +37,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     CachedGet all class names
+        ///     Get all class names
         /// </summary>
         /// <returns>JSON array containing the official 5e race names</returns>
         /// <exception cref="DndException"></exception>
@@ -105,7 +105,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     CachedGet a JArray of names from a JObject retreived from the callback
+        ///     Get a JArray of names from a JObject retreived from the callback
         /// </summary>
         /// <param name="callback"></param>
         /// <returns></returns>
@@ -119,7 +119,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     CachedGet a JObject of races from the DnDBuilder cache
+        ///     Get a JObject of races from the DnDBuilder cache
         /// </summary>
         /// <returns>A JObject containing a JArray of race name to url mappings</returns>
         private JObject GetRacesFromCache()
@@ -130,7 +130,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     CachedGet a JObject of classes from the DnDBuilder cache
+        ///     Get a JObject of classes from the DnDBuilder cache
         /// </summary>
         /// <returns>A JObject containing a JArray of class name to url mappings</returns>
         private JObject GetClassesFromCache()
@@ -141,7 +141,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     CachedGet a dnd5eapi url from a JToken by name
+        ///     Get a dnd5eapi url from a JToken by name
         /// </summary>
         /// <param name="array">A JToken containing a list of name and url mappings</param>
         /// <param name="name">A valid dnd5eapi name</param>
@@ -158,7 +158,7 @@ namespace DnDBuilderLinux.Handlers
         }
 
         /// <summary>
-        ///     CachedGet a JObject containing a classes data
+        ///     Get a JObject containing a classes data
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>

@@ -178,7 +178,10 @@ namespace DnDBuilderLinux.Database
             foreach (KeyValuePair<string, string> entry in dict)
             {
                 string columnName = SanitizeColumn(entry.Key);
-                setString += columnName + "=@" + columnName + ", ";
+                if (!string.IsNullOrEmpty(columnName))
+                {
+                    setString += columnName + "=@" + columnName + ", ";
+                }
             }
 
             return setString.Substring(0, setString.Length - 2);
@@ -196,12 +199,8 @@ namespace DnDBuilderLinux.Database
              * Find a constant column name that matches the string 'column'
              * This will prevent SQL injection by throwing an exception when the columnName
              * contains anything other than the name of a column.
-             */
-
-            if (!Schema.Character.Field.AllFields.Any(x => x.Equals(column, StringComparison.OrdinalIgnoreCase)))
-                throw new DatabaseException("Column " + column + " not found");
-            
-            string newColumnName = Schema.Character.Field.AllFields.First(x => x.Equals(column, StringComparison.OrdinalIgnoreCase));
+             */            
+            string newColumnName = Schema.Character.Field.AllFields.FirstOrDefault(x => x.Equals(column, StringComparison.OrdinalIgnoreCase));
             return newColumnName;
 
         }
